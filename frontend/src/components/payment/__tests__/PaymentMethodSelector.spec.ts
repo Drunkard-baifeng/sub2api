@@ -25,7 +25,7 @@ describe('PaymentMethodSelector', () => {
     })
 
     const grid = wrapper.get('[data-testid="payment-method-grid"]')
-    expect(grid.classes()).toEqual(expect.arrayContaining(['grid', 'sm:grid-cols-3', 'lg:grid-cols-4']))
+    expect(grid.classes()).toEqual(expect.arrayContaining(['grid', 'sm:grid-cols-3', 'lg:grid-cols-4', '2xl:grid-cols-5']))
     expect(grid.classes()).not.toContain('sm:flex')
 
     const buttons = wrapper.findAll('button')
