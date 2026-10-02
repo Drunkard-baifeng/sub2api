@@ -94,6 +94,30 @@ class ReleaseMatrixTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'checksum mismatch'):
             release.verify(args)
 
+    def test_custom_stable_publication_is_latest_but_previews_are_not(self):
+        for version in ('0.2.13-custom.1', '0.2.13-custom.10', '0.2.13-rc.1',
+                        '0.2.13-custom.1-rc.1', '0.2.13-custom.0', '0.2.13-custom.01', '0.2.13'):
+            for simple in (False, True):
+                with self.subTest(version=version, simple=simple), patch.dict(os.environ, {'RELEASE_VERSION': version}):
+                    release.generate_config(argparse.Namespace(mode='publish', simple=simple, output='publisher.yaml'))
+                    data = yaml.safe_load(Path('publisher.yaml').read_text())['release']
+                    if not simple and version in ('0.2.13-custom.1', '0.2.13-custom.10'):
+                        self.assertEqual(data['prerelease'], 'false')
+                        self.assertEqual(data['make_latest'], 'true')
+                    else:
+                        self.assertEqual(data['prerelease'], 'auto')
+                        self.assertNotIn('make_latest', data)
+
+    def test_custom_tag_sets_binary_version_without_losing_revision(self):
+        with patch.dict(os.environ, {'GITHUB_OUTPUT': 'outputs'}), patch.object(subprocess, 'check_output', return_value='a' * 40 + '\n'):
+            release.plan(argparse.Namespace(ref='v0.2.13-custom.1', dry_run=False, simple=False))
+        self.assertEqual(release.VERSION_FILE.read_text().strip(), '0.2.13-custom.1')
+        output = dict(line.split('=', 1) for line in Path('outputs').read_text().splitlines())
+        self.assertEqual(output['tag'], 'v0.2.13-custom.1')
+        self.assertEqual(output['version'], '0.2.13-custom.1')
+        self.assertEqual(release.archive_name(output['version'], {'goos': 'linux', 'goarch': 'amd64'}),
+                         'sub2api_0.2.13-custom.1_linux_amd64.tar.gz')
+
     def test_missing_extra_and_wrong_commit_artifacts_are_rejected(self):
         args = self.fixture_artifacts(True)
         args.sha = 'b' * 40
@@ -115,11 +139,16 @@ class ReleaseMatrixTest(unittest.TestCase):
         Path('deploy/docker-entrypoint.sh').write_text('#!/bin/sh\nexec /app/sub2api\n')
         Path('backend/resources').mkdir()
         Path('backend/resources/data').write_text('fixture')
-        release.contexts(args)
+        with patch.object(Path, 'chmod', autospec=True, side_effect=Path.chmod) as chmod:
+            release.contexts(args)
         for arch in ('amd64', 'arm64'):
             binary = Path('contexts') / arch / 'sub2api'
             self.assertEqual(binary.read_bytes(), b'fixture')
-            self.assertEqual(binary.stat().st_mode & 0o777, 0o755)
+            chmod.assert_any_call(binary, 0o755)
+            # Windows does not store POSIX executable bits. CI on Linux checks
+            # the actual mode as well as the permission requested by the helper.
+            if os.name != 'nt':
+                self.assertEqual(binary.stat().st_mode & 0o777, 0o755)
 
     def test_plan_requires_a_tag_for_publication(self):
         args = argparse.Namespace(ref='main', dry_run=False, simple=False)

@@ -30,7 +30,7 @@ var (
 const (
 	updateCacheKey = "update_check_cache"
 	updateCacheTTL = 1200 // 20 minutes
-	githubRepo     = "Wei-Shaw/sub2api"
+	githubRepo     = "Drunkard-baifeng/sub2api"
 
 	// Security: allowed download domains for updates
 	allowedDownloadHost = "github.com"
@@ -600,12 +600,17 @@ func (s *UpdateService) getFromCache(ctx context.Context) (*UpdateInfo, error) {
 	}
 
 	var cached struct {
+		Repository  string       `json:"repository"`
 		Latest      string       `json:"latest"`
 		ReleaseInfo *ReleaseInfo `json:"release_info"`
 		Timestamp   int64        `json:"timestamp"`
 	}
 	if err := json.Unmarshal([]byte(data), &cached); err != nil {
 		return nil, err
+	}
+	// Reject legacy/upstream cache entries, including the fallback on API errors.
+	if cached.Repository != githubRepo {
+		return nil, fmt.Errorf("cached update belongs to a different repository")
 	}
 
 	if time.Now().Unix()-cached.Timestamp > updateCacheTTL {
@@ -624,10 +629,12 @@ func (s *UpdateService) getFromCache(ctx context.Context) (*UpdateInfo, error) {
 
 func (s *UpdateService) saveToCache(ctx context.Context, info *UpdateInfo) {
 	cacheData := struct {
+		Repository  string       `json:"repository"`
 		Latest      string       `json:"latest"`
 		ReleaseInfo *ReleaseInfo `json:"release_info"`
 		Timestamp   int64        `json:"timestamp"`
 	}{
+		Repository:  githubRepo,
 		Latest:      info.LatestVersion,
 		ReleaseInfo: info.ReleaseInfo,
 		Timestamp:   time.Now().Unix(),
@@ -637,12 +644,14 @@ func (s *UpdateService) saveToCache(ctx context.Context, info *UpdateInfo) {
 	_ = s.cache.SetUpdateInfo(ctx, string(data), time.Duration(updateCacheTTL)*time.Second)
 }
 
-// compareVersions compares two semantic versions
+// compareVersions compares base versions, then this fork's stable custom revision.
+// For the same base, 0.2.13 < 0.2.13-custom.1 < 0.2.13-custom.2.
+// Other suffixes retain the existing base-version comparison behavior.
 func compareVersions(current, latest string) int {
 	currentParts := parseVersion(current)
 	latestParts := parseVersion(latest)
 
-	for i := 0; i < 3; i++ {
+	for i := range currentParts {
 		if currentParts[i] < latestParts[i] {
 			return -1
 		}
@@ -653,16 +662,19 @@ func compareVersions(current, latest string) int {
 	return 0
 }
 
-func parseVersion(v string) [3]int {
+func parseVersion(v string) [4]int {
 	v = strings.TrimPrefix(v, "v")
-	if idx := strings.IndexByte(v, '-'); idx != -1 {
-		v = v[:idx]
-	}
-	parts := strings.Split(v, ".")
-	result := [3]int{0, 0, 0}
+	base, suffix, _ := strings.Cut(v, "-")
+	parts := strings.Split(base, ".")
+	var result [4]int
 	for i := 0; i < len(parts) && i < 3; i++ {
 		if parsed, err := strconv.Atoi(parts[i]); err == nil {
 			result[i] = parsed
+		}
+	}
+	if revision, ok := strings.CutPrefix(suffix, "custom."); ok {
+		if parsed, err := strconv.Atoi(revision); err == nil && parsed > 0 && strconv.Itoa(parsed) == revision {
+			result[3] = parsed
 		}
 	}
 	return result

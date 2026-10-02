@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"testing"
 	"time"
@@ -29,15 +30,20 @@ func (s *updateServiceCacheStub) SetUpdateInfo(_ context.Context, data string, _
 
 type updateServiceGitHubClientStub struct {
 	release        *GitHubRelease
+	latestErr      error
+	latestRepo     string
 	recentReleases []*GitHubRelease
 	recentErr      error
+	recentRepo     string
 }
 
-func (s *updateServiceGitHubClientStub) FetchLatestRelease(context.Context, string) (*GitHubRelease, error) {
-	return s.release, nil
+func (s *updateServiceGitHubClientStub) FetchLatestRelease(_ context.Context, repo string) (*GitHubRelease, error) {
+	s.latestRepo = repo
+	return s.release, s.latestErr
 }
 
-func (s *updateServiceGitHubClientStub) FetchRecentReleases(context.Context, string, int) ([]*GitHubRelease, error) {
+func (s *updateServiceGitHubClientStub) FetchRecentReleases(_ context.Context, repo string, _ int) ([]*GitHubRelease, error) {
+	s.recentRepo = repo
 	return s.recentReleases, s.recentErr
 }
 
@@ -184,4 +190,117 @@ func TestUpdateServiceRollbackToVersionAcceptsVPrefix(t *testing.T) {
 	require.Error(t, err)
 	require.NotErrorIs(t, err, ErrRollbackVersionNotAllowed)
 	require.Contains(t, err.Error(), "no compatible release found")
+}
+
+func TestUpdateServiceCompareCustomVersions(t *testing.T) {
+	for _, tc := range []struct {
+		current string
+		latest  string
+		want    int
+	}{
+		{"0.2.13", "0.2.13-custom.1", -1},
+		{"v0.2.13-custom.1", "0.2.13-custom.2", -1},
+		{"0.2.13-custom.9", "v0.2.13-custom.10", -1},
+		{"0.2.13-custom.10", "0.2.13-custom.2", 1},
+		{"0.2.13-custom.1", "v0.2.13-custom.1", 0},
+		{"0.2.13-custom.1", "0.2.13", 1},
+		{"0.2.13-custom.10", "0.2.14-custom.1", -1},
+		{"0.2.14", "0.2.13-custom.10", 1},
+		{"0.2.13-custom.10", "0.2.14", -1},
+		{"0.2.13", "0.2.13", 0},
+		// Existing non-custom suffix handling stays unchanged.
+		{"0.2.13-rc1", "0.2.13", 0},
+		{"0.2.13-custom.2-rc.1", "0.2.13-custom.1", -1},
+	} {
+		t.Run(tc.current+"_to_"+tc.latest, func(t *testing.T) {
+			require.Equal(t, tc.want, compareVersions(tc.current, tc.latest))
+		})
+	}
+}
+
+func TestUpdateServiceUsesForkAndCachesCustomUpdate(t *testing.T) {
+	ctx := context.Background()
+	cache := &updateServiceCacheStub{}
+	client := &updateServiceGitHubClientStub{
+		release: &GitHubRelease{TagName: "v0.2.13-custom.2"},
+	}
+	svc := NewUpdateService(cache, client, "0.2.13-custom.1", "release")
+	info, err := svc.CheckUpdate(ctx, false)
+	require.NoError(t, err)
+	require.True(t, info.HasUpdate)
+	require.False(t, info.Cached)
+	require.Equal(t, "Drunkard-baifeng/sub2api", client.latestRepo)
+	var cached map[string]any
+	require.NoError(t, json.Unmarshal([]byte(cache.data), &cached))
+	require.Equal(t, "Drunkard-baifeng/sub2api", cached["repository"])
+
+	// Reuse a valid fork cache even if GitHub is unavailable.
+	client.latestErr = errors.New("github unavailable")
+	info, err = svc.CheckUpdate(ctx, true)
+	require.NoError(t, err)
+	require.True(t, info.Cached)
+	require.True(t, info.HasUpdate)
+	require.Contains(t, info.Warning, "github unavailable")
+
+	// The running version is re-evaluated after an upgrade.
+	updated := NewUpdateService(cache, client, "0.2.13-custom.2", "release")
+	info, err = updated.CheckUpdate(ctx, false)
+	require.NoError(t, err)
+	require.True(t, info.Cached)
+	require.False(t, info.HasUpdate)
+}
+
+func TestUpdateServiceRejectsUpstreamAndLegacyCache(t *testing.T) {
+	for _, repository := range []string{"", "Wei-Shaw/sub2api"} {
+		for _, unavailable := range []bool{false, true} {
+			t.Run(repository+map[bool]string{true: "/offline", false: "/online"}[unavailable], func(t *testing.T) {
+				data := map[string]any{
+					"latest": "99.0.0", "timestamp": time.Now().Unix(),
+					"release_info": &ReleaseInfo{HTMLURL: "https://github.com/Wei-Shaw/sub2api/releases/tag/v99.0.0"},
+				}
+				if repository != "" {
+					data["repository"] = repository
+				}
+				encoded, err := json.Marshal(data)
+				require.NoError(t, err)
+				client := &updateServiceGitHubClientStub{release: &GitHubRelease{TagName: "v0.2.13-custom.2"}}
+				if unavailable {
+					client.latestErr = errors.New("github unavailable")
+				}
+				svc := NewUpdateService(&updateServiceCacheStub{data: string(encoded)}, client, "0.2.13-custom.1", "release")
+				info, err := svc.CheckUpdate(context.Background(), false)
+				require.NoError(t, err)
+				require.False(t, info.Cached)
+				require.Equal(t, "Drunkard-baifeng/sub2api", client.latestRepo)
+				if unavailable {
+					require.False(t, info.HasUpdate)
+					require.Nil(t, info.ReleaseInfo)
+					require.Contains(t, info.Warning, "github unavailable")
+				} else {
+					require.True(t, info.HasUpdate)
+					require.Equal(t, "0.2.13-custom.2", info.LatestVersion)
+				}
+			})
+		}
+	}
+}
+
+func TestUpdateServiceCustomRollbackOrderAndRepository(t *testing.T) {
+	client := &updateServiceGitHubClientStub{recentReleases: []*GitHubRelease{
+		{TagName: "v0.2.14-custom.1"},
+		{TagName: "v0.2.13-custom.11"},
+		{TagName: "v0.2.13-custom.2"},
+		{TagName: "v0.2.13-custom.10"},
+		{TagName: "v0.2.13-custom.9"},
+		{TagName: "v0.2.13"},
+		{TagName: "v0.2.13-custom.8", Prerelease: true},
+	}}
+	svc := NewUpdateService(&updateServiceCacheStub{}, client, "0.2.13-custom.11", "release")
+	versions, err := svc.ListRollbackVersions(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, "Drunkard-baifeng/sub2api", client.recentRepo)
+	require.Len(t, versions, 3)
+	require.Equal(t, "0.2.13-custom.10", versions[0].Version)
+	require.Equal(t, "0.2.13-custom.9", versions[1].Version)
+	require.Equal(t, "0.2.13-custom.2", versions[2].Version)
 }

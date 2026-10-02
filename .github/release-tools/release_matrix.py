@@ -18,6 +18,7 @@ FULL_CONFIG = Path('.goreleaser.yaml')
 SIMPLE_CONFIG = Path('.goreleaser.simple.yaml')
 VERSION_FILE = Path('backend/cmd/server/VERSION')
 VERSION_RE = re.compile(r'\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?')
+CUSTOM_STABLE_RE = re.compile(r'\d+\.\d+\.\d+-custom\.[1-9]\d*')
 
 
 def config(simple=False):
@@ -95,6 +96,12 @@ def generate_config(args):
         data['before'] = {'hooks': []}
         data['builds'] = [{'id': 'sub2api', 'skip': True}]
         data['archives'] = []
+        # custom.N is this fork's stable revision, not a preview release. GitHub's
+        # /releases/latest endpoint is used by both the installer and auto-update.
+        # Leave rc/beta (and the optional image-only mode) on the original policy.
+        if not args.simple and CUSTOM_STABLE_RE.fullmatch(os.environ.get('RELEASE_VERSION', '')):
+            data['release']['prerelease'] = 'false'
+            data['release']['make_latest'] = 'true'
         extra = [{'glob': 'release-input/sub2api_*.tar.gz'}, {'glob': 'release-input/sub2api_*.zip'}]
         if args.simple:
             data['checksum'] = {'disable': True}
