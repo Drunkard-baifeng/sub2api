@@ -52,6 +52,7 @@ export default {
     close: '关闭',
     toggleMenu: '切换菜单',
     userMenu: '用户菜单',
+    walletDetails: '余额明细',
     pageNotFound: '页面不存在',
     enabled: '已启用',
     disabled: '已禁用',
@@ -163,6 +164,9 @@ export default {
 
   // Navigation
   nav: {
+    sectionApi: 'API',
+    sectionBilling: '账单',
+    sectionOther: '其他',
     dashboard: '仪表盘',
     announcements: '公告',
     apiKeys: 'API 密钥',
@@ -238,6 +242,8 @@ export default {
     emailLabel: '邮箱',
     emailPlaceholder: '请输入邮箱',
     passwordLabel: '密码',
+    showPassword: '显示密码',
+    hidePassword: '隐藏密码',
     passwordPlaceholder: '请输入密码',
     createPasswordPlaceholder: '创建一个安全的密码',
     passwordHint: '至少 6 个字符',
@@ -285,7 +291,7 @@ export default {
     codeRequired: '请输入验证码',
     invalidCode: '请输入有效的6位验证码',
     promoCodeLabel: '优惠码',
-    promoCodePlaceholder: '输入优惠码（可选）',
+    promoCodePlaceholder: '输入优惠码',
     promoCodeValid: '有效！注册后将获得 ${amount} 赠送余额',
     promoCodeInvalid: '无效的优惠码',
     promoCodeNotFound: '优惠码不存在',

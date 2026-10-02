@@ -311,6 +311,17 @@ export default {
 
   // Payment System
   payment: {
+    rechargePanel: {
+      chooseAmount: '选择充值金额',
+      chooseAmountHint: '选择常用档位，也可以按需输入金额。',
+      selectAmount: '选择此金额',
+      selected: '已选择',
+      customHint: '按需填写，灵活充值',
+      summary: '支付详情',
+      balanceHint: '用于账户余额计费的 API 调用',
+      selectFirst: '请选择充值金额',
+      checkoutHint: '确认金额和支付方式后，点击按钮进入支付。',
+    },
     title: '充值/订阅',
     amountLabel: '充值金额',
     paymentAmount: '支付金额',

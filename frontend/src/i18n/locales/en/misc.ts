@@ -287,6 +287,17 @@ export default {
 
   // Payment System
   payment: {
+    rechargePanel: {
+      chooseAmount: 'Choose your top-up amount',
+      chooseAmountHint: 'Select a preset or enter a custom amount.',
+      selectAmount: 'Select amount',
+      selected: 'Selected',
+      customHint: 'Choose the amount you need',
+      summary: 'Payment summary',
+      balanceHint: 'For API calls billed to your account balance',
+      selectFirst: 'Select an amount',
+      checkoutHint: 'Review the amount and payment method, then continue to payment.',
+    },
     title: 'Recharge / Subscription',
     amountLabel: 'Amount',
     paymentAmount: 'Payment Amount',

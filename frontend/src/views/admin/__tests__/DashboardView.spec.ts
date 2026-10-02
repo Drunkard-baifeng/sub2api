@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 
-import type { DashboardStats } from '@/types'
+import type { DashboardStats, User } from '@/types'
+import { useAuthStore } from '@/stores/auth'
 import DashboardView from '../DashboardView.vue'
 
 const { getSnapshotV2, getUserUsageTrend, getUserSpendingRanking } = vi.hoisted(() => ({
@@ -170,5 +171,35 @@ describe('admin DashboardView', () => {
       end_date: formatLocalDate(now),
       granularity: 'hour'
     }))
+  })
+
+  it('includes the current account balance notice on the admin dashboard', async () => {
+    const authStore = useAuthStore()
+    authStore.user = { id: 1, role: 'admin', balance: 0 } as User
+    const wrapper = mount(DashboardView, {
+      global: {
+        stubs: {
+          AppLayout: { template: '<div><slot /></div>' },
+          UserDashboardBalanceNotice: true,
+          LoadingSpinner: true,
+          Icon: true,
+          DateRangePicker: true,
+          Select: true,
+          ModelDistributionChart: true,
+          TokenUsageTrend: true,
+          Line: true
+        }
+      }
+    })
+    await flushPromises()
+
+    const notice = wrapper.findComponent({ name: 'UserDashboardBalanceNotice' })
+    expect(notice.exists()).toBe(true)
+    expect(notice.props()).toMatchObject({ balance: 0, isSimple: false })
+    expect(wrapper.find('.space-y-6').element.firstElementChild).toBe(notice.element)
+
+    authStore.user.balance = 25
+    await flushPromises()
+    expect(notice.props('balance')).toBe(25)
   })
 })

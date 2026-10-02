@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <title>极速 AI</title>
+  <defs>
+    <linearGradient id="base" x1="56" y1="24" x2="462" y2="496" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#184D52"/>
+      <stop offset="1" stop-color="#092931"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="308" y1="96" x2="204" y2="412" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EDFFF9"/>
+      <stop offset=".48" stop-color="#91F5D7"/>
+      <stop offset="1" stop-color="#39CEBC"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="44" y1="44" x2="460" y2="476" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B5FBE5" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#72CADA" stop-opacity=".12"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="496" height="496" rx="128" fill="url(#base)"/>
+  <rect x="10" y="10" width="492" height="492" rx="126" stroke="url(#rim)" stroke-width="4"/>
+  <path d="M167 161C126 188 108 224 112 268C117 316 145 350 182 365" stroke="#61CEBF" stroke-width="20" stroke-linecap="round"/>
+  <path d="M345 351C386 324 404 288 400 244C395 196 367 162 330 147" stroke="#61CEBF" stroke-width="20" stroke-linecap="round"/>
+  <path d="M281 98L171 266C166 274 171 284 181 284H235L213 403C211 414 225 420 232 411L345 242C351 234 345 224 336 224H280L301 108C303 96 288 88 281 98Z" fill="url(#bolt)"/>
+  <circle cx="167" cy="161" r="17" fill="#C2FAE9"/>
+  <circle cx="345" cy="351" r="17" fill="#C2FAE9"/>
+</svg>

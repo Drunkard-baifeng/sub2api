@@ -158,6 +158,7 @@ type UpdateSettingsRequest struct {
 	SiteSubtitle                string                `json:"site_subtitle"`
 	APIBaseURL                  string                `json:"api_base_url"`
 	ContactInfo                 string                `json:"contact_info"`
+	RedeemPurchaseURL           *string               `json:"redeem_purchase_url"`
 	DocURL                      string                `json:"doc_url"`
 	HomeContent                 string                `json:"home_content"`
 	CompactHomeEnabled          bool                  `json:"compact_home_enabled"`
@@ -1224,6 +1225,18 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		}
 	}
 
+	// CDK 商店链接独立于在线充值与购买订阅配置。
+	redeemPurchaseURL := previousSettings.RedeemPurchaseURL
+	if req.RedeemPurchaseURL != nil {
+		redeemPurchaseURL = strings.TrimSpace(*req.RedeemPurchaseURL)
+	}
+	if redeemPurchaseURL != "" {
+		if err := config.ValidateAbsoluteHTTPURL(redeemPurchaseURL); err != nil {
+			response.BadRequest(c, "Redeem purchase URL must be an absolute http(s) URL")
+			return
+		}
+	}
+
 	// “购买订阅”页面配置验证
 	purchaseEnabled := previousSettings.PurchaseSubscriptionEnabled
 	if req.PurchaseSubscriptionEnabled != nil {
@@ -1641,6 +1654,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		SiteSubtitle:                           req.SiteSubtitle,
 		APIBaseURL:                             req.APIBaseURL,
 		ContactInfo:                            req.ContactInfo,
+		RedeemPurchaseURL:                      redeemPurchaseURL,
 		DocURL:                                 req.DocURL,
 		HomeContent:                            req.HomeContent,
 		CompactHomeEnabled:                     req.CompactHomeEnabled,
@@ -2302,6 +2316,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		SiteSubtitle:                                           updatedSettings.SiteSubtitle,
 		APIBaseURL:                                             updatedSettings.APIBaseURL,
 		ContactInfo:                                            updatedSettings.ContactInfo,
+		RedeemPurchaseURL:                                      updatedSettings.RedeemPurchaseURL,
 		DocURL:                                                 updatedSettings.DocURL,
 		HomeContent:                                            updatedSettings.HomeContent,
 		CompactHomeEnabled:                                     updatedSettings.CompactHomeEnabled,

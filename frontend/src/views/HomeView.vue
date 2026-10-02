@@ -91,404 +91,124 @@
   </div>
 
   <!-- Default Home Page -->
-  <div
-    v-else
-    class="relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950"
-  >
-    <!-- Background Decorations -->
-    <div class="pointer-events-none absolute inset-0 overflow-hidden">
-      <div
-        class="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-primary-400/20 blur-3xl"
-      ></div>
-      <div
-        class="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-primary-500/15 blur-3xl"
-      ></div>
-      <div
-        class="absolute left-1/3 top-1/4 h-72 w-72 rounded-full bg-primary-300/10 blur-3xl"
-      ></div>
-      <div
-        class="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-primary-400/10 blur-3xl"
-      ></div>
-      <div
-        class="absolute inset-0 bg-[linear-gradient(rgba(20,184,166,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(20,184,166,0.03)_1px,transparent_1px)] bg-[size:64px_64px]"
-      ></div>
-    </div>
+  <div v-else class="home-page" data-testid="default-home">
+    <div class="home-glow home-glow-left" aria-hidden="true"></div>
+    <div class="home-glow home-glow-right" aria-hidden="true"></div>
+    <div class="home-grid" aria-hidden="true"></div>
 
-    <!-- Header -->
-    <header class="relative z-20 px-6 py-4">
-      <nav class="mx-auto flex max-w-6xl items-center justify-between">
-        <!-- Logo -->
-        <div class="flex items-center">
-          <div class="h-10 w-10 overflow-hidden rounded-xl shadow-md">
-            <img :src="siteLogo || '/logo.svg'" alt="Logo" class="h-full w-full object-contain" />
-          </div>
-        </div>
+    <header class="home-header">
+      <router-link to="/" class="home-brand" :aria-label="t('home.glass.homeLink')">
+        <span class="home-brand-mark">
+          <img :src="siteLogo || '/jisu-ai-logo.svg'" :alt="siteName" />
+        </span>
+        <span class="home-brand-name">{{ siteName }}</span>
+      </router-link>
 
-        <!-- Nav Actions -->
-        <div class="flex items-center gap-3">
-          <!-- Language Switcher -->
-          <LocaleSwitcher />
-
-          <!-- Doc Link -->
-          <a
-            v-if="docUrl"
-            :href="docUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
-            :title="t('home.viewDocs')"
-          >
-            <Icon name="book" size="md" />
-          </a>
-
-          <!-- Model Plaza Link -->
-          <router-link
-            v-if="showModelPlazaEntry"
-            to="/model-plaza"
-            class="inline-flex items-center gap-1.5 rounded-lg p-2 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
-            :title="t('nav.modelPlaza')"
-          >
-            <Icon name="grid" size="md" />
-            <span class="hidden sm:inline">{{ t('nav.modelPlaza') }}</span>
-          </router-link>
-
-          <!-- Theme Toggle -->
-          <button
-            @click="toggleTheme"
-            class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
-            :title="isDark ? t('home.switchToLight') : t('home.switchToDark')"
-          >
-            <Icon v-if="isDark" name="sun" size="md" />
-            <Icon v-else name="moon" size="md" />
-          </button>
-
-          <!-- Login / Dashboard Button -->
-          <router-link
-            v-if="isAuthenticated"
-            :to="dashboardPath"
-            class="inline-flex items-center gap-1.5 rounded-full bg-gray-900 py-1 pl-1 pr-2.5 transition-colors hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700"
-          >
-            <span
-              class="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-[10px] font-semibold text-white"
-            >
-              {{ userInitial }}
-            </span>
-            <span class="text-xs font-medium text-white">{{ t('home.dashboard') }}</span>
-            <svg
-              class="h-3 w-3 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
-              />
-            </svg>
-          </router-link>
-          <router-link
-            v-else
-            to="/login"
-            class="inline-flex items-center rounded-full bg-gray-900 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700"
-          >
-            {{ t('home.login') }}
-          </router-link>
-        </div>
+      <nav class="home-nav" :aria-label="t('home.glass.navigation')">
+        <a v-if="docUrl" :href="docUrl" target="_blank" rel="noopener noreferrer" class="home-nav-link">
+          <Icon name="book" size="sm" />
+          <span>{{ t('home.viewDocs') }}</span>
+        </a>
+        <router-link v-if="showModelPlazaEntry" to="/model-plaza" class="home-nav-link">
+          <Icon name="grid" size="sm" />
+          <span>{{ t('nav.modelPlaza') }}</span>
+        </router-link>
+        <LocaleSwitcher />
+        <button class="home-icon-button" :title="isDark ? t('home.switchToLight') : t('home.switchToDark')" @click="toggleTheme">
+          <Icon v-if="isDark" name="sun" size="sm" />
+          <Icon v-else name="moon" size="sm" />
+        </button>
+        <router-link :to="isAuthenticated ? dashboardPath : '/login'" class="home-login-button">
+          {{ isAuthenticated ? t('home.dashboard') : t('home.login') }}
+          <Icon name="arrowRight" size="sm" />
+        </router-link>
       </nav>
     </header>
 
-    <!-- Main Content -->
-    <main class="relative z-10 flex-1 px-6 py-16">
-      <div class="mx-auto max-w-6xl">
-        <!-- Hero Section - Left/Right Layout -->
-        <div class="mb-12 flex flex-col items-center justify-between gap-12 lg:flex-row lg:gap-16">
-          <!-- Left: Text Content -->
-          <div class="flex-1 text-center lg:text-left">
-            <h1
-              class="mb-4 text-4xl font-bold text-gray-900 dark:text-white md:text-5xl lg:text-6xl"
-            >
-              {{ siteName }}
-            </h1>
-            <p class="mb-8 text-lg text-gray-600 dark:text-dark-300 md:text-xl">
-              {{ siteSubtitle }}
-            </p>
-
-            <!-- CTA Button -->
-            <div>
-              <router-link
-                :to="isAuthenticated ? dashboardPath : '/login'"
-                class="btn btn-primary px-8 py-3 text-base shadow-lg shadow-primary-500/30"
-              >
-                {{ isAuthenticated ? t('home.goToDashboard') : t('home.getStarted') }}
-                <Icon name="arrowRight" size="md" class="ml-2" :stroke-width="2" />
-              </router-link>
-            </div>
+    <main class="home-main">
+      <section class="home-hero">
+        <div class="home-copy">
+          <div class="home-eyebrow"><span class="home-pulse"></span>{{ t('home.glass.eyebrow') }}</div>
+          <h1>{{ t('home.glass.title') }}<br /><span>{{ t('home.glass.titleAccent') }}</span></h1>
+          <p class="home-subtitle">{{ t('home.glass.description') }}</p>
+          <div class="home-actions">
+            <router-link :to="isAuthenticated ? dashboardPath : '/login'" class="home-primary-button">
+              {{ isAuthenticated ? t('home.goToDashboard') : t('home.getStarted') }}
+              <Icon name="arrowRight" size="sm" />
+            </router-link>
+            <router-link v-if="showModelPlazaEntry" to="/model-plaza" class="home-secondary-button">
+              {{ t('nav.modelPlaza') }}<Icon name="grid" size="sm" />
+            </router-link>
           </div>
+          <div class="hero-tools" aria-hidden="true">
+            <span><Icon name="chat" size="sm" />{{ t('home.glass.chat') }}</span>
+            <span><Icon name="cpu" size="sm" />{{ t('home.glass.code') }}</span>
+            <span><Icon name="chart" size="sm" />{{ t('home.glass.analysis') }}</span>
+          </div>
+        </div>
 
-          <!-- Right: Terminal Animation -->
-          <div class="flex flex-1 justify-center lg:justify-end">
-            <div class="terminal-container">
-              <div class="terminal-window">
-                <!-- Window header -->
-                <div class="terminal-header">
-                  <div class="terminal-buttons">
-                    <span class="btn-close"></span>
-                    <span class="btn-minimize"></span>
-                    <span class="btn-maximize"></span>
-                  </div>
-                  <span class="terminal-title">terminal</span>
-                </div>
-                <!-- Terminal content -->
-                <div class="terminal-body">
-                  <div class="code-line line-1">
-                    <span class="code-prompt">$</span>
-                    <span class="code-cmd">curl</span>
-                    <span class="code-flag">-X POST</span>
-                    <span class="code-url">/v1/messages</span>
-                  </div>
-                  <div class="code-line line-2">
-                    <span class="code-comment"># Routing to upstream...</span>
-                  </div>
-                  <div class="code-line line-3">
-                    <span class="code-success">200 OK</span>
-                    <span class="code-response">{ "content": "Hello!" }</span>
-                  </div>
-                  <div class="code-line line-4">
-                    <span class="code-prompt">$</span>
-                    <span class="cursor"></span>
-                  </div>
-                </div>
+        <div class="gateway-preview">
+          <div class="preview-top"><span><Icon name="cpu" size="sm" />{{ t('home.glass.gateway') }}</span><small>{{ t('home.glass.preview') }}</small></div>
+          <div class="preview-flow" aria-hidden="true">
+            <span class="flow-app"><Icon name="grid" size="md" /></span>
+            <span class="flow-wire"></span>
+            <span class="flow-hub"><img src="/jisu-ai-logo.svg" alt="" /></span>
+            <span class="flow-wire"></span>
+            <span class="flow-model" :class="'model-' + selectedModel">{{ modelSymbols[selectedModel] }}</span>
+          </div>
+          <div class="model-tabs" :aria-label="t('home.glass.chooseModel')">
+            <button v-for="model in modelOptions" :key="model" type="button" :aria-pressed="selectedModel === model" :class="['model-tab', 'model-' + model, { active: selectedModel === model }]" @click="selectedModel = model">
+              <span>{{ modelSymbols[model] }}</span>{{ model }}
+            </button>
+          </div>
+          <div class="preview-chat" aria-live="polite">
+            <div class="chat-question"><Icon name="chat" size="sm" />{{ modelCopy[selectedModel].prompt }}</div>
+            <div class="chat-answer">
+              <span class="answer-spark">✦</span>
+              <div>
+                <strong>{{ modelCopy[selectedModel].answer }}</strong>
+                <div v-if="selectedModel === 'Claude'" class="mini-code" aria-hidden="true"><span>function</span> connect() &#123;<br />&nbsp; <span>return</span> ideas.map(create)<br />&#125;</div>
+                <div v-else-if="selectedModel === 'GPT'" class="writing-preview" aria-hidden="true"><i></i><i></i><i></i></div>
+                <div v-else class="analysis-preview" aria-hidden="true"><i v-for="(height, index) in chartHeights" :key="index" :style="{ height: height + '%' }"></i></div>
               </div>
             </div>
           </div>
+          <div class="preview-bottom"><span>{{ t('home.glass.unifiedEntry') }}</span><span>{{ t('home.glass.exampleOnly') }}</span></div>
         </div>
+      </section>
 
-        <!-- Feature Tags - Centered -->
-        <div class="mb-12 flex flex-wrap items-center justify-center gap-4 md:gap-6">
-          <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
-          >
-            <Icon name="swap" size="sm" class="text-primary-500" />
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
-              t('home.tags.subscriptionToApi')
-            }}</span>
-          </div>
-          <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
-          >
-            <Icon name="shield" size="sm" class="text-primary-500" />
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
-              t('home.tags.stickySession')
-            }}</span>
-          </div>
-          <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
-          >
-            <Icon name="chart" size="sm" class="text-primary-500" />
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
-              t('home.tags.realtimeBilling')
-            }}</span>
-          </div>
+      <section class="model-shelf" :aria-label="t('home.glass.ecosystem')">
+        <div class="shelf-heading"><span class="section-label">{{ t('home.glass.ecosystem') }}</span><p>{{ t('home.glass.modelNote') }}</p></div>
+        <div class="shelf-models">
+          <button v-for="model in modelOptions" :key="model" type="button" :class="['shelf-model', 'model-' + model, { selected: selectedModel === model }]" :aria-pressed="selectedModel === model" @click="selectedModel = model">
+            <b>{{ modelSymbols[model] }}</b><span><strong>{{ model }}</strong><small>{{ modelCopy[model].role }}</small></span><Icon name="arrowRight" size="sm" />
+          </button>
         </div>
+      </section>
 
-        <!-- Features Grid -->
-        <div class="mb-12 grid gap-6 md:grid-cols-3">
-          <!-- Feature 1: Unified Gateway -->
-          <div
-            class="group rounded-2xl border border-gray-200/50 bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
-          >
-            <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30 transition-transform group-hover:scale-110"
-            >
-              <Icon name="server" size="lg" class="text-white" />
-            </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-              {{ t('home.features.unifiedGateway') }}
-            </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
-              {{ t('home.features.unifiedGatewayDesc') }}
-            </p>
+      <section class="home-workspace" :aria-label="t('home.glass.capabilities')">
+        <article class="workspace-card setup-card">
+          <div class="card-heading"><span class="feature-icon"><Icon name="link" size="md" /></span><div><h2>{{ t('home.glass.setupTitle') }}</h2><p>{{ t('home.glass.setupDescription') }}</p></div></div>
+          <ol class="setup-steps">
+            <li><span>01</span><Icon name="key" size="md" /><strong>{{ t('home.glass.stepKey') }}</strong></li>
+            <li><span>02</span><Icon name="link" size="md" /><strong>{{ t('home.glass.stepConnect') }}</strong></li>
+            <li><span>03</span><Icon name="chart" size="md" /><strong>{{ t('home.glass.stepUsage') }}</strong></li>
+          </ol>
+          <a v-if="docUrl" class="card-link" :href="docUrl" target="_blank" rel="noopener noreferrer">{{ t('home.viewDocs') }}<Icon name="arrowRight" size="sm" /></a>
+          <router-link v-else class="card-link" :to="isAuthenticated ? dashboardPath : '/login'">{{ isAuthenticated ? t('home.goToDashboard') : t('home.getStarted') }}<Icon name="arrowRight" size="sm" /></router-link>
+        </article>
+        <article class="workspace-card usage-card">
+          <div class="card-heading"><span class="feature-icon"><Icon name="chart" size="md" /></span><div><h2>{{ t('home.glass.usageTitle') }}</h2><p>{{ t('home.glass.usageDescription') }}</p></div></div>
+          <div class="usage-visual" aria-hidden="true">
+            <div class="usage-bars"><i v-for="(height, index) in usageHeights" :key="index" :style="{ height: height + '%' }"></i></div>
+            <div class="usage-legend"><span>Claude</span><span>GPT</span><span>Gemini</span></div>
           </div>
-
-          <!-- Feature 2: Account Pool -->
-          <div
-            class="group rounded-2xl border border-gray-200/50 bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
-          >
-            <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 shadow-lg shadow-primary-500/30 transition-transform group-hover:scale-110"
-            >
-              <svg
-                class="h-6 w-6 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
-                />
-              </svg>
-            </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-              {{ t('home.features.multiAccount') }}
-            </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
-              {{ t('home.features.multiAccountDesc') }}
-            </p>
-          </div>
-
-          <!-- Feature 3: Billing & Quota -->
-          <div
-            class="group rounded-2xl border border-gray-200/50 bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
-          >
-            <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/30 transition-transform group-hover:scale-110"
-            >
-              <svg
-                class="h-6 w-6 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-                />
-              </svg>
-            </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-              {{ t('home.features.balanceQuota') }}
-            </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
-              {{ t('home.features.balanceQuotaDesc') }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Supported Providers -->
-        <div class="mb-8 text-center">
-          <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">
-            {{ t('home.providers.title') }}
-          </h2>
-          <p class="text-sm text-gray-600 dark:text-dark-400">
-            {{ t('home.providers.description') }}
-          </p>
-        </div>
-
-        <div class="mb-16 flex flex-wrap items-center justify-center gap-4">
-          <!-- Claude - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-400 to-orange-500"
-            >
-              <span class="text-xs font-bold text-white">C</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.claude') }}</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- GPT - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-green-600"
-            >
-              <span class="text-xs font-bold text-white">G</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">GPT</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- Gemini - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600"
-            >
-              <span class="text-xs font-bold text-white">G</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.gemini') }}</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- Antigravity - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-pink-600"
-            >
-              <span class="text-xs font-bold text-white">A</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.antigravity') }}</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- More - Coming Soon -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-gray-200/50 bg-white/40 px-5 py-3 opacity-60 backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/40"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-gray-500 to-gray-600"
-            >
-              <span class="text-xs font-bold text-white">+</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.more') }}</span>
-            <span
-              class="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-dark-700 dark:text-dark-400"
-              >{{ t('home.providers.soon') }}</span
-            >
-          </div>
-        </div>
-      </div>
+          <small class="visual-note">{{ t('home.glass.usagePreview') }}</small>
+        </article>
+      </section>
     </main>
-
-    <!-- Footer -->
-    <footer class="relative z-10 border-t border-gray-200/50 px-6 py-8 dark:border-dark-800/50">
-      <div
-        class="mx-auto flex max-w-6xl flex-col items-center justify-center gap-4 text-center sm:flex-row sm:text-left"
-      >
-        <p class="text-sm text-gray-500 dark:text-dark-400">
-          &copy; {{ currentYear }} {{ siteName }}. {{ t('home.footer.allRightsReserved') }}
-        </p>
-        <div class="flex items-center gap-4">
-          <a
-            v-if="docUrl"
-            :href="docUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
-          >
-            {{ t('home.docs') }}
-          </a>
-          <a
-            :href="githubUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
-          >
-            GitHub
-          </a>
-        </div>
-      </div>
+    <footer class="home-footer">
+      <span>&copy; {{ currentYear }} {{ siteName }}</span>
     </footer>
   </div>
 </template>
@@ -523,11 +243,31 @@ const isHomeContentUrl = computed(() => {
   return content.startsWith('http://') || content.startsWith('https://')
 })
 
+const modelOptions = ['Claude', 'GPT', 'Gemini'] as const
+const selectedModel = ref<(typeof modelOptions)[number]>('Claude')
+const modelSymbols = { Claude: '✳', GPT: '◈', Gemini: '✦' }
+const modelCopy = computed(() => ({
+  Claude: {
+    prompt: t('home.glass.promptClaude'),
+    answer: t('home.glass.answerClaude'),
+    role: t('home.glass.roleClaude'),
+  },
+  GPT: {
+    prompt: t('home.glass.promptGPT'),
+    answer: t('home.glass.answerGPT'),
+    role: t('home.glass.roleGPT'),
+  },
+  Gemini: {
+    prompt: t('home.glass.promptGemini'),
+    answer: t('home.glass.answerGemini'),
+    role: t('home.glass.roleGemini'),
+  },
+}))
+const chartHeights = [32, 50, 42, 68, 58, 82, 72, 94]
+const usageHeights = [24, 38, 32, 50, 42, 64, 53, 72, 58, 82, 68, 92, 77, 87, 72, 96]
 // Theme
 const isDark = ref(document.documentElement.classList.contains('dark'))
 
-// GitHub URL
-const githubUrl = 'https://github.com/Wei-Shaw/sub2api'
 
 // Auth state
 const isAuthenticated = computed(() => authStore.isAuthenticated)
@@ -539,11 +279,6 @@ const showModelPlazaEntry = computed(
 )
 const isAdmin = computed(() => authStore.isAdmin)
 const dashboardPath = computed(() => isAdmin.value ? '/admin/dashboard' : '/dashboard')
-const userInitial = computed(() => {
-  const user = authStore.user
-  if (!user || !user.email) return ''
-  return user.email.charAt(0).toUpperCase()
-})
 
 // Current year for footer
 const currentYear = computed(() => new Date().getFullYear())
@@ -581,164 +316,165 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Terminal Container */
-.terminal-container {
-  position: relative;
-  display: inline-block;
+.home-page {
+  --home-ink: #163d43; --home-muted: #59757e; --home-glass: #ffffff70; --home-border: #ffffffb8; --home-inset: #ffffff5c; --home-accent: #138b7d;
+  position: relative; isolation: isolate; display: flex; min-height: 100svh; flex-direction: column; overflow: hidden; background: #eef5f6; color: var(--home-ink);
 }
-
-/* Terminal Window */
-.terminal-window {
-  width: 420px;
-  background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
-  border-radius: 14px;
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-  transform: perspective(1000px) rotateX(2deg) rotateY(-2deg);
-  transition: transform 0.3s ease;
+.home-glow { position: absolute; z-index: -1; width: 1100px; height: 900px; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+.home-glow-left { top: -380px; left: -280px; background: radial-gradient(circle, #a6e8d8, transparent 65%); opacity: .65; }
+.home-glow-right { top: -170px; right: -240px; background: radial-gradient(circle, #b8c9ed, #d7dfed 40%, transparent 65%); opacity: .7; }
+.home-grid { position: absolute; z-index: -1; inset: 0; pointer-events: none; background-image: radial-gradient(#54959920 .8px, transparent .8px); background-size: 24px 24px; mask-image: linear-gradient(transparent, #0005 35%, transparent 85%); }
+.home-header, .home-main, .home-footer { width: min(100% - 72px, 1400px); margin: 0 auto; }
+.home-header { position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 28px 0; }
+.home-brand { display: inline-flex; align-items: center; gap: 12px; min-width: 0; }
+.home-brand-mark { flex-shrink: 0; width: 44px; height: 44px; border-radius: 13px; overflow: hidden; }
+.home-brand-mark img { width: 100%; height: 100%; object-fit: contain; }
+.home-brand-name { font-size: 23px; font-weight: 700; letter-spacing: -.5px; overflow-wrap: anywhere; }
+.home-nav { display: flex; align-items: center; justify-content: flex-end; gap: 18px; flex-wrap: wrap; }
+.home-nav-link { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--home-muted); }
+.home-nav-link:hover { color: var(--home-accent); }
+.home-icon-button { display: grid; place-items: center; flex-shrink: 0; width: 38px; height: 38px; border: 1px solid var(--home-border); border-radius: 12px; color: var(--home-muted); background: var(--home-glass); backdrop-filter: blur(16px); }
+.home-login-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 38px; padding: 0 16px; border-radius: 12px; background: #173b41; color: #fff; font-size: 13px; font-weight: 600; }
+.home-main { display: flex; flex: 1; flex-direction: column; justify-content: center; gap: 26px; padding: 24px 0 40px; }
+.home-hero { display: grid; grid-template-columns: .85fr 1.15fr; align-items: center; gap: clamp(40px, 5vw, 90px); padding: 14px 0 24px; }
+.home-copy { min-width: 0; padding-left: 8px; }
+.home-eyebrow { display: inline-flex; align-items: center; gap: 9px; color: var(--home-accent); font-size: 13px; letter-spacing: 1px; margin-bottom: 22px; }
+.home-pulse { width: 6px; height: 6px; border-radius: 50%; background: #19b9a0; box-shadow: 0 0 0 4px #1bb99f12; }
+.home-copy h1 { font-size: clamp(30px, 2.5vw, 42px); line-height: 1.5; font-weight: 600; letter-spacing: -1.5px; }
+.home-copy h1 > span { color: var(--home-accent); }
+.home-subtitle { margin-top: 18px; max-width: 390px; color: var(--home-muted); font-size: 14px; line-height: 1.9; }
+.home-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+.home-primary-button, .home-secondary-button { display: inline-flex; align-items: center; justify-content: center; gap: 13px; min-height: 46px; padding: 0 22px; border-radius: 13px; font-size: 14px; font-weight: 600; transition: transform .2s; }
+.home-primary-button { background: linear-gradient(115deg, #0d9e94, #108c89); color: #fff; box-shadow: 0 8px 22px #0b918620, inset 0 1px 0 #ffffff30; }
+.home-secondary-button { background: var(--home-glass); border: 1px solid var(--home-border); }
+.home-primary-button:hover, .home-secondary-button:hover { transform: translateY(-2px); }
+.hero-tools { display: flex; gap: 22px; margin-top: 32px; color: var(--home-muted); font-size: 12px; }
+.hero-tools span { display: flex; align-items: center; gap: 7px; }
+.gateway-preview, .workspace-card { border: 1px solid var(--home-border); background: var(--home-glass); backdrop-filter: blur(28px); box-shadow: inset 0 1px 0 #ffffff80, 0 18px 60px #30566d09; border-radius: 26px; }
+.gateway-preview { padding: 23px 28px 18px; min-width: 0; position: relative; }
+.preview-top, .preview-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.preview-top > span { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; }
+.preview-top small { font-size: 10px; color: var(--home-muted); padding: 4px 8px; border: 1px solid #789ba82b; border-radius: 6px; }
+.preview-flow { display: flex; justify-content: center; align-items: center; padding: 18px 20px; }
+.flow-app, .flow-model { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border: 1px solid var(--home-border); background: var(--home-inset); border-radius: 14px; color: var(--home-accent); font-size: 27px; }
+.flow-wire { width: 90px; height: 1px; background: linear-gradient(90deg, #4bb8a822, #4bb8a899, #4bb8a822); position: relative; }
+.flow-wire::after { content: ''; position: absolute; top: -2px; left: 30%; width: 5px; height: 5px; border-radius: 50%; background: #69cab8; animation: route-pulse 3s ease-in-out infinite; }
+.flow-hub { display: grid; place-items: center; width: 68px; height: 68px; padding: 9px; border-radius: 22px; background: #c5eadc55; border: 1px solid var(--home-border); box-shadow: 0 0 0 7px #6bc2af0c; flex-shrink: 0; }
+.flow-hub img { width: 100%; height: 100%; }
+.model-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; padding: 5px; background: #7194a00a; border-radius: 13px; }
+.model-tab { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 5px; border-radius: 9px; border: 1px solid transparent; color: var(--home-muted); font-size: 12px; transition: background .2s; }
+.model-tab span { font-size: 19px; }
+.model-tab.active { border-color: var(--home-border); background: var(--home-inset); color: var(--home-ink); box-shadow: 0 2px 6px #28445406; }
+.model-Claude > b, .model-Claude > span:first-child, .flow-model.model-Claude { color: #b2795c; }
+.model-GPT > b, .model-GPT > span:first-child, .flow-model.model-GPT { color: #259784; }
+.model-Gemini > b, .model-Gemini > span:first-child, .flow-model.model-Gemini { color: #7b82cb; }
+.preview-chat { padding: 20px 5px 16px; min-height: 162px; }
+.chat-question { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--home-muted); }
+.chat-answer { display: grid; grid-template-columns: 24px 1fr; gap: 10px; margin-top: 16px; }
+.answer-spark { color: var(--home-accent); font-size: 22px; line-height: 1; }
+.chat-answer strong { display: block; font-size: 12px; font-weight: 500; }
+.mini-code { margin-top: 9px; font-family: ui-monospace, monospace; font-size: 11px; line-height: 1.7; color: var(--home-muted); }
+.mini-code span { color: var(--home-accent); }
+.writing-preview { display: grid; gap: 9px; margin-top: 16px; }
+.writing-preview i { height: 6px; width: 92%; border-radius: 4px; background: #77b8ad26; }
+.writing-preview i:nth-child(2) { width: 78%; }.writing-preview i:last-child { width: 54%; }
+.analysis-preview { display: flex; height: 65px; align-items: flex-end; gap: 12px; margin-top: 10px; }
+.analysis-preview i { width: 9%; border-radius: 4px 4px 0 0; background: linear-gradient(#85a3d8aa, #85a3d826); }
+.preview-bottom { padding-top: 12px; border-top: 1px solid #6e9ba31f; font-size: 10px; color: var(--home-muted); }
+.model-shelf { display: grid; grid-template-columns: .75fr 2fr; align-items: center; gap: 26px; padding: 22px 0; border-top: 1px solid #71979e26; border-bottom: 1px solid #71979e26; }
+.section-label { font-size: 15px; font-weight: 600; }
+.shelf-heading p { font-size: 11px; color: var(--home-muted); margin-top: 6px; line-height: 1.6; }
+.shelf-models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.shelf-model { display: flex; align-items: center; gap: 12px; min-width: 0; text-align: left; border: 1px solid transparent; border-radius: 15px; padding: 13px; transition: background .2s; }
+.shelf-model:hover, .shelf-model.selected { background: var(--home-glass); border-color: var(--home-border); }
+.shelf-model > b { display: grid; place-items: center; width: 36px; height: 36px; background: var(--home-inset); border-radius: 11px; font-size: 24px; font-weight: 400; flex-shrink: 0; }
+.shelf-model strong { display: block; font-size: 14px; font-weight: 600; }
+.shelf-model small { display: block; margin-top: 3px; font-size: 10px; color: var(--home-muted); }
+.shelf-model > svg { margin-left: auto; flex-shrink: 0; opacity: .4; }
+.home-workspace { display: grid; grid-template-columns: 1.15fr 1fr; gap: 24px; }
+.workspace-card { padding: 24px 28px 20px; min-width: 0; }
+.card-heading { display: flex; align-items: center; gap: 14px; }
+.feature-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: #68bda414; color: var(--home-accent); flex-shrink: 0; }
+.card-heading h2 { font-size: 16px; font-weight: 600; }
+.card-heading p { margin-top: 4px; font-size: 12px; line-height: 1.6; color: var(--home-muted); }
+.setup-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 21px; padding: 0; list-style: none; }
+.setup-steps li { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; background: var(--home-inset); border: 1px solid var(--home-border); border-radius: 13px; padding: 12px 14px; }
+.setup-steps li > span { font-size: 10px; color: var(--home-muted); font-family: ui-monospace, monospace; }
+.setup-steps svg { color: var(--home-accent); }
+.setup-steps strong { grid-column: 1 / -1; font-size: 12px; font-weight: 500; }
+.card-link { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; font-size: 11px; color: var(--home-accent); }
+.usage-visual { display: flex; align-items: center; gap: 24px; padding: 20px 2px 0; }
+.usage-bars { display: flex; align-items: flex-end; flex: 1; height: 72px; gap: 6px; border-bottom: 1px solid #7aa6a333; background: repeating-linear-gradient(to top, transparent 0, transparent 23px, #719b9a12 23px, #719b9a12 24px); }
+.usage-bars i { flex: 1; background: linear-gradient(#60bba99c, #92d0c429); border-radius: 4px 4px 0 0; }
+.usage-bars i:nth-child(3n) { background: linear-gradient(#859dce99, #abc5e326); }
+.usage-legend { display: grid; gap: 10px; color: var(--home-muted); font-size: 10px; }
+.usage-legend span::before { content: ''; display: inline-block; width: 5px; height: 5px; margin-right: 7px; border-radius: 2px; background: #6fbaa9; }
+.usage-legend span:last-child::before { background: #859dce; }
+.visual-note { display: block; text-align: right; font-size: 10px; color: var(--home-muted); margin-top: 12px; }
+.home-footer { padding: 18px 0 24px; text-align: center; color: var(--home-muted); font-size: 12px; }
+.home-page :is(a, button):focus-visible { outline: 2px solid var(--home-accent); outline-offset: 4px; border-radius: 9px; }
+.dark .home-page { --home-ink: #e0eeee; --home-muted: #9bb1b9; --home-glass: #243b4b65; --home-border: #b9dfeb1f; --home-inset: #8cb8c00a; --home-accent: #74d8c1; background: #0e191f; }
+.dark .home-glow-left { background: radial-gradient(circle, #1a514d, transparent 65%); }
+.dark .home-glow-right { background: radial-gradient(circle, #263b55, transparent 65%); }
+.dark .home-login-button { background: #b1e7dc; color: #153b3b; }
+.dark .gateway-preview, .dark .workspace-card { box-shadow: inset 0 1px 0 #ffffff09, 0 18px 60px #00000014; }
+.dark .flow-hub { background: #80e0bf0c; }
+.dark .model-Claude > b, .dark .model-Claude > span:first-child, .dark .flow-model.model-Claude { color: #dfab8d; }
+.dark .model-GPT > b, .dark .model-GPT > span:first-child, .dark .flow-model.model-GPT { color: #7ad8bc; }
+.dark .model-Gemini > b, .dark .model-Gemini > span:first-child, .dark .flow-model.model-Gemini { color: #b2b8f5; }
+@keyframes route-pulse { 0%, 100% { left: 15%; opacity: .3; } 60% { left: 80%; opacity: 1; } }
+@media (min-width: 1800px) {
+  .home-header, .home-main, .home-footer { width: min(80%, 1920px); }
+  .home-main { gap: 38px; padding-top: 42px; padding-bottom: 42px; }
+  .home-hero { gap: 8%; padding-bottom: 28px; }
+  .home-copy h1 { font-size: 44px; }
+  .home-subtitle { font-size: 16px; max-width: 440px; }
+  .gateway-preview { padding: 28px 38px 22px; }
+  .preview-flow { padding: 22px; }
+  .preview-chat { min-height: 184px; padding-top: 24px; }
+  .chat-question, .chat-answer strong { font-size: 14px; }
+  .mini-code { font-size: 13px; }
+  .model-shelf { padding: 28px 0; }
+  .workspace-card { padding: 30px 34px 24px; }
+  .setup-steps { margin-top: 28px; }
+  .setup-steps li { padding: 18px; }
+  .usage-bars { height: 94px; }
 }
-
-.terminal-window:hover {
-  transform: perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(-4px);
+@media (max-width: 1050px) {
+  .home-hero { gap: 28px; grid-template-columns: 1fr 1.1fr; }
+  .home-copy h1 { font-size: 33px; }
+  .gateway-preview { padding: 20px; }
+  .model-shelf { grid-template-columns: 1fr; gap: 12px; }
+  .home-workspace { gap: 18px; }
+  .workspace-card { padding: 22px; }
 }
-
-/* Terminal Header */
-.terminal-header {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: rgba(30, 41, 59, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+@media (max-width: 760px) {
+  .home-header, .home-main, .home-footer { width: calc(100% - 40px); }
+  .home-header { flex-wrap: wrap; gap: 18px; padding: 22px 0; }
+  .home-brand-name { font-size: 22px; }
+  .home-nav { gap: 12px; flex: 1; }
+  .home-nav-link { font-size: 12px; }
+  .home-main { gap: 24px; padding: 18px 0 28px; }
+  .home-hero { grid-template-columns: 1fr; gap: 32px; padding: 10px 0 0; }
+  .home-copy { text-align: center; padding: 0; }
+  .home-copy h1 { font-size: 32px; }
+  .home-subtitle { margin: 15px auto 0; font-size: 13px; }
+  .home-actions, .hero-tools { justify-content: center; }
+  .hero-tools { margin-top: 22px; }
+  .gateway-preview { padding: 20px 18px; }
+  .shelf-heading { text-align: center; }
+  .shelf-models { gap: 4px; }
+  .shelf-model { flex-direction: column; padding: 12px 4px; gap: 7px; text-align: center; }
+  .shelf-model > svg { display: none; }
+  .shelf-model strong { font-size: 12px; }
+  .shelf-model small { font-size: 9px; }
+  .home-workspace { grid-template-columns: 1fr; gap: 18px; }
+  .setup-steps { gap: 7px; }
+  .setup-steps li { padding: 11px; }
+  .setup-steps strong { font-size: 11px; }
 }
-
-.terminal-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.terminal-buttons span {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.btn-close {
-  background: #ef4444;
-}
-.btn-minimize {
-  background: #eab308;
-}
-.btn-maximize {
-  background: #22c55e;
-}
-
-.terminal-title {
-  flex: 1;
-  text-align: center;
-  font-size: 12px;
-  font-family: ui-monospace, monospace;
-  color: #64748b;
-  margin-right: 52px;
-}
-
-/* Terminal Body */
-.terminal-body {
-  padding: 20px 24px;
-  font-family: ui-monospace, 'Fira Code', monospace;
-  font-size: 14px;
-  line-height: 2;
-}
-
-.code-line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  opacity: 0;
-  animation: line-appear 0.5s ease forwards;
-}
-
-.line-1 {
-  animation-delay: 0.3s;
-}
-.line-2 {
-  animation-delay: 1s;
-}
-.line-3 {
-  animation-delay: 1.8s;
-}
-.line-4 {
-  animation-delay: 2.5s;
-}
-
-@keyframes line-appear {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.code-prompt {
-  color: #22c55e;
-  font-weight: bold;
-}
-.code-cmd {
-  color: #38bdf8;
-}
-.code-flag {
-  color: #a78bfa;
-}
-.code-url {
-  color: #14b8a6;
-}
-.code-comment {
-  color: #64748b;
-  font-style: italic;
-}
-.code-success {
-  color: #22c55e;
-  background: rgba(34, 197, 94, 0.15);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 600;
-}
-.code-response {
-  color: #fbbf24;
-}
-
-/* Blinking Cursor */
-.cursor {
-  display: inline-block;
-  width: 8px;
-  height: 16px;
-  background: #22c55e;
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0;
-  }
-}
-
-/* Dark mode adjustments */
-:deep(.dark) .terminal-window {
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(20, 184, 166, 0.2),
-    0 0 40px rgba(20, 184, 166, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+@media (prefers-reduced-motion: reduce) {
+  .flow-wire::after { animation: none; }
+  .home-primary-button, .home-secondary-button, .model-tab, .shelf-model { transition: none; }
 }
 </style>

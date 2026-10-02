@@ -2,9 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import RedeemView from '../RedeemView.vue'
 
-const { redeem, getHistory, refreshUser, fetchActiveSubscriptions, showError, showWarning, showSuccess } = vi.hoisted(() => ({
+const { redeem, getHistory, getPublicSettings, refreshUser, fetchActiveSubscriptions, showError, showWarning, showSuccess } = vi.hoisted(() => ({
   redeem: vi.fn(),
   getHistory: vi.fn(),
+  getPublicSettings: vi.fn(),
   refreshUser: vi.fn(),
   fetchActiveSubscriptions: vi.fn(),
   showError: vi.fn(),
@@ -14,7 +15,7 @@ const { redeem, getHistory, refreshUser, fetchActiveSubscriptions, showError, sh
 
 vi.mock('@/api', () => ({
   redeemAPI: { redeem, getHistory },
-  authAPI: { getPublicSettings: vi.fn().mockResolvedValue({}) },
+  authAPI: { getPublicSettings },
 }))
 vi.mock('@/stores/auth', () => ({
   useAuthStore: () => ({ user: { balance: 10, concurrency: 2 }, refreshUser }),
@@ -44,6 +45,7 @@ async function submitCode() {
 describe('RedeemView refresh after redemption', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    getPublicSettings.mockResolvedValue({})
     redeem.mockResolvedValue({ type: 'balance', value: 20, message: 'Code applied' })
     getHistory.mockResolvedValue({ items: [], total: 0 })
     refreshUser.mockResolvedValue({ balance: 30, concurrency: 2 })
@@ -53,6 +55,45 @@ describe('RedeemView refresh after redemption', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+  })
+
+  it.each([
+    [{}, 'https://catfk.com/shop/7LOVBPOL'],
+    [{ redeem_purchase_url: ' https://example.com/cdk ' }, 'https://example.com/cdk'],
+    [{ redeem_purchase_url: '' }, null],
+    [{ redeem_purchase_url: 'javascript:alert(1)' }, null],
+    [{ redeem_purchase_url: '/relative-shop' }, null],
+  ])('uses the configured shop, preserves opt-out and rejects unsafe destinations: %j', async (settings, expected) => {
+    getPublicSettings.mockResolvedValue(settings)
+    const wrapper = mount(RedeemView, {
+      global: { stubs: { AppLayout: { template: '<div><slot /></div>' }, Icon: true } },
+    })
+    await flushPromises()
+    const link = wrapper.find('[data-testid="redeem-purchase-link"]')
+    if (expected) {
+      expect(link.attributes('href')).toBe(expected)
+      expect(link.attributes('target')).toBe('_blank')
+      expect(link.attributes('rel')).toBe('noopener noreferrer')
+    } else {
+      expect(link.exists()).toBe(false)
+      expect(wrapper.find('[data-testid="redeem-purchase-card"]').exists()).toBe(false)
+    }
+    expect(redeem).not.toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  it('keeps redemption available without showing an unverified shop if settings fail', async () => {
+    getPublicSettings.mockRejectedValue(new Error('Unavailable'))
+    const wrapper = mount(RedeemView, {
+      global: { stubs: { AppLayout: { template: '<div><slot /></div>' }, Icon: true } },
+    })
+    await flushPromises()
+    expect(wrapper.find('[data-testid="redeem-purchase-link"]').exists()).toBe(false)
+    await wrapper.get('input#code').setValue('   ')
+    expect(wrapper.get('[data-testid="redeem-submit"]').attributes('disabled')).toBeDefined()
+    await wrapper.get('input#code').setValue('VALID-CODE')
+    expect(wrapper.get('[data-testid="redeem-submit"]').attributes('disabled')).toBeUndefined()
+    wrapper.unmount()
   })
 
   it.each(['balance', 'concurrency', 'subscription'])(

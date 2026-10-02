@@ -6666,6 +6666,25 @@
                 </p>
               </div>
 
+              <!-- Redeem Code Shop -->
+              <div>
+                <label for="redeem-purchase-url" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ t("admin.settings.site.redeemPurchaseUrl") }}
+                </label>
+                <input
+                  id="redeem-purchase-url"
+                  v-model="form.redeem_purchase_url"
+                  data-testid="redeem-purchase-url"
+                  type="url"
+                  class="input font-mono text-sm"
+                  :placeholder="DEFAULT_REDEEM_PURCHASE_URL"
+                  aria-describedby="redeem-purchase-url-hint"
+                />
+                <p id="redeem-purchase-url-hint" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {{ t("admin.settings.site.redeemPurchaseUrlHint") }}
+                </p>
+              </div>
+
               <!-- Doc URL -->
               <div>
                 <label
@@ -9034,6 +9053,7 @@ import {
 import TotpStepUpDialog from "@/components/auth/TotpStepUpDialog.vue";
 import { affiliatesAPI, type AffiliateAdminEntry, type SimpleUser as AffiliateSimpleUser } from "@/api/admin/affiliates";
 import { extractApiErrorMessage, extractI18nErrorMessage } from "@/utils/apiError";
+import { DEFAULT_REDEEM_PURCHASE_URL } from "@/config/redeem";
 import { useAppStore } from "@/stores";
 import { useAdminSettingsStore } from "@/stores/adminSettings";
 import { normalizeVisibleMethod } from "@/components/payment/paymentFlow";
@@ -9784,6 +9804,7 @@ const form = reactive<SettingsForm>({
   site_subtitle: "Subscription to API Conversion Platform",
   api_base_url: "",
   contact_info: "",
+  redeem_purchase_url: DEFAULT_REDEEM_PURCHASE_URL,
   doc_url: "",
   home_content: "",
   compact_home_enabled: false,
@@ -11481,6 +11502,7 @@ async function saveSettings() {
       site_subtitle: form.site_subtitle,
       api_base_url: form.api_base_url,
       contact_info: form.contact_info,
+      redeem_purchase_url: form.redeem_purchase_url?.trim() ?? "",
       doc_url: form.doc_url,
       home_content: form.home_content,
       compact_home_enabled: form.compact_home_enabled,

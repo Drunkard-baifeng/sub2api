@@ -1,211 +1,235 @@
 <template>
   <AppLayout>
-    <div class="mx-auto max-w-2xl space-y-6">
-      <!-- Current Balance Card -->
-      <div class="card overflow-hidden">
-        <div class="bg-gradient-to-br from-primary-500 to-primary-600 px-6 py-8 text-center">
-          <div
-            class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm"
-          >
-            <Icon name="creditCard" size="xl" class="text-white" />
+    <div data-testid="redeem-workspace" class="mx-auto w-full max-w-[1440px] space-y-6">
+      <div class="grid items-stretch gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <!-- Redeem form is the primary action; account and shop stay alongside it. -->
+        <section class="redeem-surface flex min-w-0 flex-col p-5 sm:p-8 xl:col-start-2 xl:row-start-1" aria-labelledby="redeem-form-title">
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0">
+              <h2 id="redeem-form-title" class="text-xl font-semibold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
+                {{ t('redeem.workspace.formTitle') }}
+              </h2>
+              <p class="mt-2 text-sm leading-relaxed text-gray-500 dark:text-dark-400">
+                {{ t('redeem.workspace.formHint') }}
+              </p>
+            </div>
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary-100 bg-primary-50 text-primary-600 dark:border-primary-800/60 dark:bg-primary-900/30 dark:text-primary-300">
+              <Icon name="gift" size="lg" aria-hidden="true" />
+            </div>
           </div>
-          <p class="text-sm font-medium text-primary-100">{{ t('redeem.currentBalance') }}</p>
-          <p class="mt-2 text-4xl font-bold text-white">
-            ${{ user?.balance?.toFixed(2) || '0.00' }}
-          </p>
-          <p class="mt-2 text-sm text-primary-100">
-            {{ t('redeem.concurrency') }}: {{ user?.concurrency || 0 }} {{ t('redeem.requests') }}
-          </p>
-        </div>
-      </div>
 
-      <!-- Redeem Form -->
-      <div class="card">
-        <div class="p-6">
-          <form @submit.prevent="handleRedeem" class="space-y-5">
+          <form @submit.prevent="handleRedeem" :aria-busy="submitting" class="my-7 space-y-4 sm:my-8">
             <div>
-              <label for="code" class="input-label">
-                {{ t('redeem.redeemCodeLabel') }}
-              </label>
-              <div class="relative mt-1">
+              <div class="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                <label for="code" class="text-sm font-medium text-gray-700 dark:text-gray-200">
+                  {{ t('redeem.redeemCodeLabel') }}
+                </label>
+                <span id="redeem-code-hint" class="text-xs text-gray-500 dark:text-dark-400">
+                  {{ t('redeem.redeemCodeHint') }}
+                </span>
+              </div>
+              <div class="relative">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                  <Icon name="gift" size="md" class="text-gray-400 dark:text-dark-500" />
+                  <Icon name="key" size="md" class="text-primary-500 dark:text-primary-400" aria-hidden="true" />
                 </div>
                 <input
                   id="code"
                   v-model="redeemCode"
                   type="text"
                   required
+                  autocomplete="off"
+                  autocapitalize="off"
+                  :spellcheck="false"
+                  aria-describedby="redeem-code-hint"
+                  :aria-invalid="!!errorMessage"
                   :placeholder="t('redeem.redeemCodePlaceholder')"
                   :disabled="submitting"
-                  class="input py-3 pl-12 text-lg"
+                  class="input min-h-16 rounded-xl bg-white/80 pl-12 pr-4 font-mono text-base dark:bg-dark-950/40 sm:text-lg"
                 />
               </div>
-              <p class="input-hint">
-                {{ t('redeem.redeemCodeHint') }}
-              </p>
             </div>
 
             <button
               type="submit"
-              :disabled="!redeemCode || submitting"
-              class="btn btn-primary w-full py-3"
+              data-testid="redeem-submit"
+              :disabled="!redeemCode.trim() || submitting"
+              class="btn btn-primary min-h-12 w-full gap-2 rounded-xl"
             >
-              <svg
-                v-if="submitting"
-                class="-ml-1 mr-2 h-5 w-5 animate-spin"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              <Icon v-else name="checkCircle" size="md" class="mr-2" />
+              <span v-if="submitting" class="h-5 w-5 animate-spin rounded-full border-2 border-white/35 border-t-white" aria-hidden="true"></span>
+              <Icon v-else name="checkCircle" size="md" aria-hidden="true" />
               {{ submitting ? t('redeem.redeeming') : t('redeem.redeemButton') }}
+              <Icon v-if="!submitting" name="arrowRight" size="sm" aria-hidden="true" />
             </button>
           </form>
-        </div>
-      </div>
 
-      <!-- Success Message -->
-      <transition name="fade">
-        <div
-          v-if="redeemResult"
-          class="card border-emerald-200 bg-emerald-50 dark:border-emerald-800/50 dark:bg-emerald-900/20"
-        >
-          <div class="p-6">
-            <div class="flex items-start gap-4">
-              <div
-                class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30"
-              >
-                <Icon name="checkCircle" size="md" class="text-emerald-600 dark:text-emerald-400" />
+          <!-- Success Message -->
+          <transition name="fade">
+            <div
+              v-if="redeemResult"
+              role="status"
+              class="card mb-6 border-emerald-200 bg-emerald-50 dark:border-emerald-800/50 dark:bg-emerald-900/20"
+            >
+              <div class="p-6">
+                <div class="flex items-start gap-4">
+                  <div
+                    class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30"
+                  >
+                    <Icon name="checkCircle" size="md" class="text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+                      {{ t('redeem.redeemSuccess') }}
+                    </h3>
+                    <div class="mt-2 text-sm text-emerald-700 dark:text-emerald-400">
+                      <p>{{ redeemResult.message }}</p>
+                      <div class="mt-3 space-y-1">
+                        <p v-if="redeemResult.type === 'balance'" class="font-medium">
+                          {{ t('redeem.added') }}: ${{ redeemResult.value.toFixed(2) }}
+                        </p>
+                        <p v-else-if="redeemResult.type === 'concurrency'" class="font-medium">
+                          {{ t('redeem.added') }}: {{ redeemResult.value }}
+                          {{ t('redeem.concurrentRequests') }}
+                        </p>
+                        <p v-else-if="redeemResult.type === 'subscription'" class="font-medium">
+                          {{ t('redeem.subscriptionAssigned') }}
+                          <span v-if="redeemResult.group_name"> - {{ redeemResult.group_name }}</span>
+                          <span v-if="redeemResult.validity_days">
+                            ({{
+                              t('redeem.subscriptionDays', { days: redeemResult.validity_days })
+                            }})</span
+                          >
+                        </p>
+                        <p v-if="redeemResult.new_balance !== undefined">
+                          {{ t('redeem.newBalance') }}:
+                          <span class="font-semibold">${{ redeemResult.new_balance.toFixed(2) }}</span>
+                        </p>
+                        <p v-if="redeemResult.new_concurrency !== undefined">
+                          {{ t('redeem.newConcurrency') }}:
+                          <span class="font-semibold"
+                            >{{ redeemResult.new_concurrency }} {{ t('redeem.requests') }}</span
+                          >
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="flex-1">
-                <h3 class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
-                  {{ t('redeem.redeemSuccess') }}
-                </h3>
-                <div class="mt-2 text-sm text-emerald-700 dark:text-emerald-400">
-                  <p>{{ redeemResult.message }}</p>
-                  <div class="mt-3 space-y-1">
-                    <p v-if="redeemResult.type === 'balance'" class="font-medium">
-                      {{ t('redeem.added') }}: ${{ redeemResult.value.toFixed(2) }}
-                    </p>
-                    <p v-else-if="redeemResult.type === 'concurrency'" class="font-medium">
-                      {{ t('redeem.added') }}: {{ redeemResult.value }}
-                      {{ t('redeem.concurrentRequests') }}
-                    </p>
-                    <p v-else-if="redeemResult.type === 'subscription'" class="font-medium">
-                      {{ t('redeem.subscriptionAssigned') }}
-                      <span v-if="redeemResult.group_name"> - {{ redeemResult.group_name }}</span>
-                      <span v-if="redeemResult.validity_days">
-                        ({{
-                          t('redeem.subscriptionDays', { days: redeemResult.validity_days })
-                        }})</span
-                      >
-                    </p>
-                    <p v-if="redeemResult.new_balance !== undefined">
-                      {{ t('redeem.newBalance') }}:
-                      <span class="font-semibold">${{ redeemResult.new_balance.toFixed(2) }}</span>
-                    </p>
-                    <p v-if="redeemResult.new_concurrency !== undefined">
-                      {{ t('redeem.newConcurrency') }}:
-                      <span class="font-semibold"
-                        >{{ redeemResult.new_concurrency }} {{ t('redeem.requests') }}</span
-                      >
+            </div>
+          </transition>
+
+          <!-- Error Message -->
+          <transition name="fade">
+            <div
+              v-if="errorMessage"
+              role="alert"
+              class="card mb-6 border-red-200 bg-red-50 dark:border-red-800/50 dark:bg-red-900/20"
+            >
+              <div class="p-6">
+                <div class="flex items-start gap-4">
+                  <div
+                    class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30"
+                  >
+                    <Icon
+                      name="exclamationCircle"
+                      size="md"
+                      class="text-red-600 dark:text-red-400"
+                    />
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-red-800 dark:text-red-300">
+                      {{ t('redeem.redeemFailed') }}
+                    </h3>
+                    <p class="mt-2 text-sm text-red-700 dark:text-red-400">
+                      {{ errorMessage }}
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </transition>
+          </transition>
 
-      <!-- Error Message -->
-      <transition name="fade">
-        <div
-          v-if="errorMessage"
-          class="card border-red-200 bg-red-50 dark:border-red-800/50 dark:bg-red-900/20"
-        >
-          <div class="p-6">
-            <div class="flex items-start gap-4">
-              <div
-                class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30"
-              >
-                <Icon
-                  name="exclamationCircle"
-                  size="md"
-                  class="text-red-600 dark:text-red-400"
-                />
-              </div>
-              <div class="flex-1">
-                <h3 class="text-sm font-semibold text-red-800 dark:text-red-300">
-                  {{ t('redeem.redeemFailed') }}
-                </h3>
-                <p class="mt-2 text-sm text-red-700 dark:text-red-400">
-                  {{ errorMessage }}
-                </p>
+          <div class="flex flex-wrap gap-2">
+            <span v-for="benefit in codeBenefits" :key="benefit.label" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200/65 bg-gray-50/70 px-3 py-2 text-xs font-medium text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-dark-300">
+              <Icon :name="benefit.icon" size="sm" aria-hidden="true" />
+              {{ t(benefit.label) }}
+            </span>
+          </div>
+          <p class="mt-3 text-xs text-gray-500 dark:text-dark-400">{{ t('redeem.workspace.benefitsHint') }}</p>
+
+          <div class="mt-auto pt-7">
+            <div class="flex items-start gap-3 border-t border-gray-200/65 pt-5 dark:border-white/10">
+              <Icon name="infoCircle" size="md" class="mt-0.5 shrink-0 text-primary-600 dark:text-primary-400" aria-hidden="true" />
+              <div class="min-w-0 space-y-1.5 text-xs leading-relaxed text-gray-500 dark:text-dark-400">
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t('redeem.workspace.helpTitle') }}</h3>
+                <p>{{ t('redeem.codeRule1') }}</p>
+                <p>{{ t('redeem.codeRule3') }}</p>
+                <p v-if="contactInfo" data-testid="redeem-contact" class="break-words text-primary-700 dark:text-primary-300">{{ contactInfo }}</p>
               </div>
             </div>
           </div>
-        </div>
-      </transition>
+        </section>
 
-      <!-- Information Card -->
-      <div
-        class="card border-primary-200 bg-primary-50 dark:border-primary-800/50 dark:bg-primary-900/20"
-      >
-        <div class="p-6">
-          <div class="flex items-start gap-4">
-            <div
-              class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/30"
+        <aside class="flex min-w-0 flex-col gap-6 xl:col-start-1 xl:row-start-1">
+          <section class="redeem-account relative isolate flex flex-col overflow-hidden rounded-2xl border border-white/80 p-6 text-gray-900 shadow-glass-sm backdrop-blur-xl dark:border-white/10 dark:text-gray-100 xl:flex-1" aria-labelledby="redeem-account-title">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary-100/80 bg-primary-50/80 text-primary-600 dark:border-white/10 dark:bg-white/5 dark:text-primary-200">
+                <Icon name="creditCard" size="md" aria-hidden="true" />
+              </div>
+              <div class="min-w-0">
+                <h2 id="redeem-account-title" class="text-xs text-gray-500 dark:text-dark-300">{{ t('redeem.workspace.account') }}</h2>
+                <p v-if="user?.username" class="mt-0.5 truncate text-base font-semibold">{{ user.username }}</p>
+              </div>
+            </div>
+            <dl class="mt-5 grid flex-1 auto-rows-fr gap-3">
+              <div class="rounded-xl border border-gray-200/60 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                <dt class="text-sm font-medium text-gray-600 dark:text-dark-300">{{ t('redeem.currentBalance') }}</dt>
+                <dd data-testid="redeem-account-balance" class="mt-3 break-words text-[2.75rem] font-bold leading-none tracking-tight text-gray-800 tabular-nums dark:text-gray-100">
+                  ${{ user?.balance?.toFixed(2) || '0.00' }}
+                </dd>
+              </div>
+              <div class="rounded-xl border border-gray-200/60 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                <dt class="text-sm font-medium text-gray-600 dark:text-dark-300">{{ t('redeem.concurrency') }}</dt>
+                <dd class="mt-3 break-words text-[2.75rem] font-bold leading-none tracking-tight text-gray-800 tabular-nums dark:text-gray-100">
+                  <span data-testid="redeem-account-concurrency">{{ user?.concurrency || 0 }}</span>
+                  <span class="ml-2 text-xs font-normal tracking-normal text-gray-500 dark:text-dark-300">{{ t('redeem.requests') }}</span>
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section v-if="purchaseUrl" data-testid="redeem-purchase-card" class="redeem-surface p-6" aria-labelledby="redeem-purchase-title">
+            <div class="flex items-center gap-2.5">
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300">
+                <Icon name="externalLink" size="md" aria-hidden="true" />
+              </span>
+              <h2 id="redeem-purchase-title" class="text-base font-semibold text-gray-900 dark:text-white">{{ t('redeem.workspace.purchaseTitle') }}</h2>
+            </div>
+            <p class="mt-3 text-sm leading-relaxed text-gray-500 dark:text-dark-400">{{ t('redeem.workspace.purchaseHint') }}</p>
+            <a
+              data-testid="redeem-purchase-link"
+              :href="purchaseUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              :title="t('redeem.workspace.opensNewTab')"
+              class="mt-5 flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-primary-200 bg-primary-50/70 px-4 py-3 text-sm font-semibold text-primary-700 transition-colors hover:border-primary-400 hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-primary-800/70 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/40 dark:focus-visible:ring-offset-dark-900"
             >
-              <Icon name="infoCircle" size="md" class="text-primary-600 dark:text-primary-400" />
-            </div>
-            <div class="flex-1">
-              <h3 class="text-sm font-semibold text-primary-800 dark:text-primary-300">
-                {{ t('redeem.aboutCodes') }}
-              </h3>
-              <ul
-                class="mt-2 list-inside list-disc space-y-1 text-sm text-primary-700 dark:text-primary-400"
-              >
-                <li>{{ t('redeem.codeRule1') }}</li>
-                <li>{{ t('redeem.codeRule2') }}</li>
-                <li>
-                  {{ t('redeem.codeRule3') }}
-                  <span
-                    v-if="contactInfo"
-                    class="ml-1.5 inline-flex items-center rounded-md bg-primary-200/50 px-2 py-0.5 text-xs font-medium text-primary-800 dark:bg-primary-800/40 dark:text-primary-200"
-                  >
-                    {{ contactInfo }}
-                  </span>
-                </li>
-                <li>{{ t('redeem.codeRule4') }}</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+              {{ t('redeem.workspace.purchaseButton') }}
+              <Icon name="externalLink" size="sm" aria-hidden="true" />
+            </a>
+          </section>
+        </aside>
       </div>
 
       <!-- Recent Activity -->
-      <div class="card">
-        <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ t('redeem.recentActivity') }}
-          </h2>
+      <section class="redeem-surface" aria-labelledby="redeem-history-title">
+        <div class="flex items-center gap-3 border-b border-gray-200/60 px-5 py-5 dark:border-white/10 sm:px-7">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100/80 text-gray-500 dark:bg-white/5 dark:text-dark-400"><Icon name="clock" size="md" aria-hidden="true" /></span>
+          <div>
+            <h2 id="redeem-history-title" class="text-base font-semibold text-gray-900 dark:text-white">{{ t('redeem.recentActivity') }}</h2>
+            <p class="mt-1 text-xs text-gray-500 dark:text-dark-400">{{ t('redeem.workspace.historyHint') }}</p>
+          </div>
         </div>
-        <div class="p-6">
+        <div class="p-5 sm:px-7">
           <!-- Loading State -->
           <div v-if="loadingHistory" class="flex items-center justify-center py-8">
             <svg class="h-6 w-6 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24">
@@ -230,12 +254,12 @@
             <div
               v-for="item in history"
               :key="item.id"
-              class="flex items-center justify-between rounded-xl bg-gray-50 p-4 dark:bg-dark-800"
+              class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-gray-100/70 bg-white/55 p-4 dark:border-white/5 dark:bg-white/[0.025]"
             >
-              <div class="flex items-center gap-4">
+              <div class="flex min-w-0 items-center gap-3">
                 <div
                   :class="[
-                    'flex h-10 w-10 items-center justify-center rounded-xl',
+                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl',
                     isBalanceType(item.type)
                       ? item.value >= 0
                         ? 'bg-emerald-100 dark:bg-emerald-900/30'
@@ -286,10 +310,10 @@
                   </p>
                 </div>
               </div>
-              <div class="text-right">
+              <div class="ml-auto min-w-0 text-right">
                 <p
                   :class="[
-                    'text-sm font-semibold',
+                    'break-words text-sm font-semibold tabular-nums',
                     isBalanceType(item.type)
                       ? item.value >= 0
                         ? 'text-emerald-600 dark:text-emerald-400'
@@ -335,32 +359,36 @@
               {{ t('redeem.historyWillAppear') }}
             </p>
           </div>
-          <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
-            <span>{{ t('common.total') }}: {{ historyTotal }} {{ t('pagination.results') }}</span>
-            <label>
-              {{ t('pagination.perPage') }}
-              <select
-                v-model="historyPageSize"
-                class="input w-20"
-                :disabled="loadingHistory || submitting"
-                @change="fetchHistory(1)"
-              >
-                <option v-for="size in [20, 50, 100]" :key="size" :value="size">{{ size }}</option>
-              </select>
-            </label>
-            <button
-              class="btn btn-secondary"
-              :disabled="loadingHistory || submitting || historyPage <= 1"
-              @click="fetchHistory(historyPage - 1)"
-            >{{ t('pagination.previous') }}</button>
-            <button
-              class="btn btn-secondary"
-              :disabled="loadingHistory || submitting || historyPage * historyPageSize >= historyTotal"
-              @click="fetchHistory(historyPage + 1)"
-            >{{ t('pagination.next') }}</button>
+          <div class="mt-5 flex flex-col gap-4 border-t border-gray-200/60 pt-5 text-sm text-gray-500 dark:border-white/10 dark:text-dark-400 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-wrap items-center justify-between gap-3 sm:justify-start sm:gap-6">
+              <span>{{ t('common.total') }}: {{ historyTotal }} {{ t('pagination.results') }}</span>
+              <label class="flex items-center gap-2">
+                {{ t('pagination.perPage') }}
+                <select
+                  v-model="historyPageSize"
+                  class="input w-20"
+                  :disabled="loadingHistory || submitting"
+                  @change="fetchHistory(1)"
+                >
+                  <option v-for="size in [20, 50, 100]" :key="size" :value="size">{{ size }}</option>
+                </select>
+              </label>
+            </div>
+            <div class="grid grid-cols-2 gap-3 sm:flex sm:gap-2">
+              <button
+                class="btn btn-secondary"
+                :disabled="loadingHistory || submitting || historyPage <= 1"
+                @click="fetchHistory(historyPage - 1)"
+              >{{ t('pagination.previous') }}</button>
+              <button
+                class="btn btn-secondary"
+                :disabled="loadingHistory || submitting || historyPage * historyPageSize >= historyTotal"
+                @click="fetchHistory(historyPage + 1)"
+              >{{ t('pagination.next') }}</button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   </AppLayout>
 </template>
@@ -375,6 +403,8 @@ import { redeemAPI, authAPI, type RedeemHistoryItem } from '@/api'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import Icon from '@/components/icons/Icon.vue'
 import { formatDateTime } from '@/utils/format'
+import { sanitizeUrl } from '@/utils/url'
+import { DEFAULT_REDEEM_PURCHASE_URL } from '@/config/redeem'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -382,6 +412,11 @@ const appStore = useAppStore()
 const subscriptionStore = useSubscriptionStore()
 
 const user = computed(() => authStore.user)
+const codeBenefits = [
+  { icon: 'creditCard', label: 'redeem.workspace.balanceType' },
+  { icon: 'bolt', label: 'redeem.workspace.concurrencyType' },
+  { icon: 'badge', label: 'redeem.workspace.subscriptionType' },
+] as const
 
 const redeemCode = ref('')
 const submitting = ref(false)
@@ -405,6 +440,8 @@ const historyTotal = ref(0)
 let historyRequest = 0
 let loadedHistoryPageSize = 20
 const contactInfo = ref('')
+const configuredPurchaseUrl = ref('')
+const purchaseUrl = computed(() => sanitizeUrl(configuredPurchaseUrl.value))
 
 // Helper functions for history display
 const isBalanceType = (type: string) => {
@@ -472,6 +509,7 @@ const fetchHistory = async (page = 1) => {
 }
 
 const handleRedeem = async () => {
+  if (submitting.value) return
   if (!redeemCode.value.trim()) {
     appStore.showError(t('redeem.pleaseEnterCode'))
     return
@@ -526,13 +564,26 @@ onMounted(async () => {
   try {
     const settings = await authAPI.getPublicSettings()
     contactInfo.value = settings.contact_info || ''
+    configuredPurchaseUrl.value = settings.redeem_purchase_url ?? DEFAULT_REDEEM_PURCHASE_URL
   } catch (error) {
-    console.error('Failed to load contact info:', error)
+    console.error('Failed to load redemption page settings:', error)
   }
 })
 </script>
 
 <style scoped>
+.redeem-surface {
+  @apply rounded-2xl border border-white/80 bg-white/80 shadow-glass-sm backdrop-blur-xl dark:border-white/10 dark:bg-dark-900/70;
+}
+
+.redeem-account {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(244, 250, 249, 0.92));
+}
+
+.dark .redeem-account {
+  background: linear-gradient(135deg, rgba(28, 40, 52, 0.96), rgba(31, 49, 55, 0.92));
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: all 0.3s ease;

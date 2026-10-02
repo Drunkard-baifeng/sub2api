@@ -52,6 +52,7 @@ export default {
     close: 'Close',
     toggleMenu: 'Toggle menu',
     userMenu: 'User menu',
+    walletDetails: 'Balance details',
     pageNotFound: 'Page not found',
     enabled: 'Enabled',
     disabled: 'Disabled',
@@ -163,6 +164,9 @@ export default {
 
   // Navigation
   nav: {
+    sectionApi: 'API',
+    sectionBilling: 'Billing',
+    sectionOther: 'Other',
     dashboard: 'Dashboard',
     announcements: 'Announcements',
     apiKeys: 'API Keys',
@@ -238,6 +242,8 @@ export default {
     emailLabel: 'Email',
     emailPlaceholder: 'Enter your email',
     passwordLabel: 'Password',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
     passwordPlaceholder: 'Enter your password',
     createPasswordPlaceholder: 'Create a strong password',
     passwordHint: 'At least 6 characters',
@@ -286,7 +292,7 @@ export default {
     codeRequired: 'Verification code is required',
     invalidCode: 'Please enter a valid 6-digit code',
     promoCodeLabel: 'Promo Code',
-    promoCodePlaceholder: 'Enter promo code (optional)',
+    promoCodePlaceholder: 'Promo code',
     promoCodeValid: 'Valid! You will receive ${amount} bonus balance',
     promoCodeInvalid: 'Invalid promo code',
     promoCodeNotFound: 'Promo code not found',

@@ -375,6 +375,34 @@ describe('PaymentView subscription plan grid', () => {
 })
 
 describe('PaymentView recharge rate preview', () => {
+  it('shows payment, credited balance, and fee totals separately without creating an order on selection', async () => {
+    routeState.path = '/purchase'
+    routeState.query = {}
+    appStoreState.setPublicSettings(undefined)
+    window.localStorage.clear()
+    createOrder.mockReset()
+    getCheckoutInfo.mockReset().mockResolvedValue(checkoutInfoFixture({
+      balance_recharge_multiplier: 0.14,
+      recharge_fee_rate: 2.5,
+    }))
+    const wrapper = shallowMount(PaymentView, {
+      global: {
+        stubs: { AppLayout: { template: '<div><slot /></div>' }, Teleport: true, Transition: false },
+      },
+    })
+    await flushPromises()
+    expect(wrapper.get('[data-testid="recharge-submit"]').attributes('disabled')).toBeDefined()
+    const picker = wrapper.getComponent(AmountInput)
+    expect(picker.props()).toMatchObject({ currency: 'CNY', balanceMultiplier: 0.14 })
+    picker.vm.$emit('update:modelValue', 50)
+    await flushPromises()
+    expect(wrapper.get('[data-testid="recharge-payment-amount"]').text()).toBe(formatPaymentAmount(50, 'CNY'))
+    expect(wrapper.get('[data-testid="recharge-credited-amount"]').text()).toBe(formatPaymentAmount(7, 'USD'))
+    expect(wrapper.get('[data-testid="recharge-total-amount"]').text()).toBe(formatPaymentAmount(51.25, 'CNY'))
+    expect(wrapper.get('[data-testid="recharge-submit"]').attributes('disabled')).toBeUndefined()
+    expect(createOrder).not.toHaveBeenCalled()
+  })
+
   it('uses the selected payment method currency in both locale templates', async () => {
     translate.mockClear()
     routeState.path = '/purchase'

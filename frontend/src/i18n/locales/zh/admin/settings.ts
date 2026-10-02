@@ -663,6 +663,8 @@ export default {
         contactInfo: '客服联系方式',
         contactInfoPlaceholder: '例如：QQ: 123456789',
         contactInfoHint: '填写客服联系方式，将展示在兑换页面、个人资料等位置',
+        redeemPurchaseUrl: '兑换码购买链接',
+        redeemPurchaseUrlHint: '兑换页面「购买 CDK」按钮的目标地址，在新标签页打开。留空则隐藏购买入口，不影响在线充值。',
         docUrl: '文档链接',
         docUrlHint: '文档网站的链接。留空则隐藏文档链接。',
         docUrlPlaceholder: 'https://docs.example.com',

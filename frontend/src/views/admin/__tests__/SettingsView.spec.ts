@@ -721,6 +721,23 @@ describe("admin SettingsView payment visible method controls", () => {
     adminSettingsFetch.mockResolvedValue(undefined);
   });
 
+  it("loads, changes and clears the independent redeem shop URL", async () => {
+    getSettings.mockResolvedValue({ ...baseSettingsResponse, redeem_purchase_url: "https://example.com/old-shop" });
+    const wrapper = mountView();
+    await flushPromises();
+    const input = wrapper.get<HTMLInputElement>('[data-testid="redeem-purchase-url"]');
+    expect(input.element.value).toBe("https://example.com/old-shop");
+    await input.setValue("https://example.com/new-shop");
+    await wrapper.find("form").trigger("submit.prevent");
+    await flushPromises();
+    expect(updateSettings).toHaveBeenLastCalledWith(expect.objectContaining({ redeem_purchase_url: "https://example.com/new-shop" }));
+    await input.setValue("");
+    await wrapper.find("form").trigger("submit.prevent");
+    await flushPromises();
+    expect(updateSettings).toHaveBeenLastCalledWith(expect.objectContaining({ redeem_purchase_url: "" }));
+    wrapper.unmount();
+  });
+
   it("loads and saves the open button visibility for each custom menu", async () => {
     const menuItems = [
       { id: "docs", label: "Docs", url: "https://example.com/docs", icon_svg: "", visibility: "user", sort_order: 0 },

@@ -671,6 +671,8 @@ export default {
         contactInfo: 'Contact Info',
         contactInfoPlaceholder: 'e.g., QQ: 123456789',
         contactInfoHint: 'Customer support contact info, displayed on redeem page, profile, etc.',
+        redeemPurchaseUrl: 'Redeem Code Purchase URL',
+        redeemPurchaseUrlHint: 'Destination for the Buy CDK button on the redemption page. Opens in a new tab. Leave empty to hide it; online top-ups are unaffected.',
         docUrl: 'Documentation URL',
         docUrlPlaceholder: 'https://docs.example.com',
         docUrlHint: 'Link to your documentation site. Leave empty to hide the documentation link.',

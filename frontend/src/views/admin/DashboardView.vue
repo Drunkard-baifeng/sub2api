@@ -7,6 +7,11 @@
       </div>
 
       <template v-else-if="stats">
+        <UserDashboardBalanceNotice
+          v-if="authStore.user"
+          :balance="authStore.user.balance"
+          :is-simple="authStore.isSimpleMode"
+        />
         <!-- Row 1: Core Stats -->
         <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <!-- Total API Keys -->
@@ -352,6 +357,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import { useAuthStore } from '@/stores/auth'
 
 const { t } = useI18n()
 import { adminAPI } from '@/api/admin'
@@ -369,6 +375,7 @@ import DateRangePicker from '@/components/common/DateRangePicker.vue'
 import Select from '@/components/common/Select.vue'
 import ModelDistributionChart from '@/components/charts/ModelDistributionChart.vue'
 import TokenUsageTrend from '@/components/charts/TokenUsageTrend.vue'
+import UserDashboardBalanceNotice from '@/components/user/dashboard/UserDashboardBalanceNotice.vue'
 import { useBatchImageAccess } from '@/composables/useBatchImageAccess'
 
 import {
@@ -395,6 +402,7 @@ ChartJS.register(
 )
 
 const appStore = useAppStore()
+const authStore = useAuthStore()
 const router = useRouter()
 const { canUseBatchImage, refreshBatchImageAccess } = useBatchImageAccess()
 const stats = ref<DashboardStats | null>(null)
@@ -753,6 +761,9 @@ const loadUserSpendingRanking = async () => {
 
 const loadDashboardStats = async () => {
   await Promise.all([
+    authStore.isAuthenticated
+      ? authStore.refreshUser().catch(error => console.warn('Failed to refresh account balance:', error))
+      : Promise.resolve(),
     loadDashboardSnapshot(true),
     loadUsersTrend(),
     loadUserSpendingRanking()
