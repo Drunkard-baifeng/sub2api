@@ -2,6 +2,8 @@
 
 This directory contains files for deploying Sub2API on Linux servers and Apple-silicon Macs.
 
+定制分支 `custom` 的日常升级流程：[合并上游 → 推送 → GitHub 编译发布 → 1Panel 更新](CUSTOM_UPDATE.md)。发布配置与首次安装见 [CUSTOM_RELEASE.md](CUSTOM_RELEASE.md)。
+
 ## Deployment Methods
 
 | Method | Best For | Setup Wizard |
