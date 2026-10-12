@@ -22,7 +22,7 @@ English | [中文](README_CN.md) | [日本語](README_JA.md)
 
 This repository is [Drunkard-baifeng/sub2api](https://github.com/Drunkard-baifeng/sub2api), a customized Fork of [Wei-Shaw/sub2api](https://github.com/Wei-Shaw/sub2api). The upstream authors retain credit for the original project; this Fork maintains its own interface and deployment channel.
 
-**Development, upstream merges, and release preparation now happen directly on this Fork's `main`.** The former `custom` branch is retained for history, not as an extra development step.
+**Development, upstream merges, and release preparation now happen directly on this Fork's `main`.** The former `custom` branch has been removed; its commit history is preserved in `main`.
 
 | Item | This Fork |
 | --- | --- |

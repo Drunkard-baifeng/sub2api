@@ -22,7 +22,7 @@
 
 本仓库是 [Drunkard-baifeng/sub2api](https://github.com/Drunkard-baifeng/sub2api)，基于 [Wei-Shaw/sub2api](https://github.com/Wei-Shaw/sub2api) Fork 并持续合并上游更新。原项目与贡献者的署名、许可证和相关声明均保留；本 Fork 主要维护定制界面、功能入口和独立发布渠道。
 
-**日常修改、合并上游和准备发布，直接在本 Fork 的 `main` 分支完成。** 原来的 `custom` 分支仅保留历史，不再需要 `custom → main` 这一步。
+**日常修改、合并上游和准备发布，直接在本 Fork 的 `main` 分支完成。** 原来的 `custom` 分支已删除，其提交历史已完整保留在 `main`，不再需要 `custom → main` 这一步。
 
 | 项目 | 本仓库约定 |
 | --- | --- |

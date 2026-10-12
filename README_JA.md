@@ -20,7 +20,7 @@
 
 ## カスタマイズ版 Fork について
 
-このリポジトリは [Wei-Shaw/sub2api](https://github.com/Wei-Shaw/sub2api) を基にした [Drunkard-baifeng/sub2api](https://github.com/Drunkard-baifeng/sub2api) です。開発・上流のマージ・リリース準備は、この Fork の **`main`** で行います。旧 `custom` ブランチは履歴用です。
+このリポジトリは [Wei-Shaw/sub2api](https://github.com/Wei-Shaw/sub2api) を基にした [Drunkard-baifeng/sub2api](https://github.com/Drunkard-baifeng/sub2api) です。開発・上流のマージ・リリース準備は、この Fork の **`main`** で行います。旧 `custom` ブランチは削除済みで、そのコミット履歴は `main` に保持されています。
 
 リリースの `-custom.N` はバージョン識別子で、ブランチ名とは独立しています。Docker イメージは `ghcr.io/drunkard-baifeng/sub2api:<version>` を使用します。
 
