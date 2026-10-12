@@ -379,6 +379,8 @@ const (
 	SettingKeyAPIBaseURL                  = "api_base_url"                  // API端点地址（用于客户端配置和导入）
 	SettingKeyContactInfo                 = "contact_info"                  // 客服联系方式
 	SettingKeyRedeemPurchaseURL           = "redeem_purchase_url"           // 兑换码购买链接（留空隐藏）
+	SettingKeyCanvasEnabled               = "canvas_enabled"                // 极速画布入口开关
+	SettingKeyCanvasURL                   = "canvas_url"                    // 极速画布外部链接
 	SettingKeyDocURL                      = "doc_url"                       // 文档链接
 	SettingKeyHomeContent                 = "home_content"                  // 首页内容（支持 Markdown/HTML，或 URL 作为 iframe src）
 	SettingKeyCompactHomeEnabled          = "compact_home_enabled"          // 是否启用内置简洁首页

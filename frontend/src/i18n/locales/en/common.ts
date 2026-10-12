@@ -165,7 +165,10 @@ export default {
   // Navigation
   nav: {
     sectionApi: 'API',
+    canvas: 'Jisu Canvas',
+    canvasNewTab: 'Jisu Canvas (opens in a new tab)',
     sectionBilling: 'Billing',
+    sectionTools: 'Tools',
     sectionOther: 'Other',
     dashboard: 'Dashboard',
     announcements: 'Announcements',

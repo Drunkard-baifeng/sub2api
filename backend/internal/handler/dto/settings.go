@@ -155,6 +155,8 @@ type SystemSettings struct {
 	APIBaseURL                  string           `json:"api_base_url"`
 	ContactInfo                 string           `json:"contact_info"`
 	RedeemPurchaseURL           string           `json:"redeem_purchase_url"`
+	CanvasEnabled               bool             `json:"canvas_enabled"`
+	CanvasURL                   string           `json:"canvas_url"`
 	DocURL                      string           `json:"doc_url"`
 	HomeContent                 string           `json:"home_content"`
 	CompactHomeEnabled          bool             `json:"compact_home_enabled"`
@@ -396,6 +398,8 @@ type PublicSettings struct {
 	APIBaseURL                          string                   `json:"api_base_url"`
 	ContactInfo                         string                   `json:"contact_info"`
 	RedeemPurchaseURL                   string                   `json:"redeem_purchase_url"`
+	CanvasEnabled                       bool                     `json:"canvas_enabled"`
+	CanvasURL                           string                   `json:"canvas_url"`
 	DocURL                              string                   `json:"doc_url"`
 	HomeContent                         string                   `json:"home_content"`
 	CompactHomeEnabled                  bool                     `json:"compact_home_enabled"`

@@ -186,6 +186,8 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SettingKeyAPIBaseURL,
 		SettingKeyContactInfo,
 		SettingKeyRedeemPurchaseURL,
+		SettingKeyCanvasEnabled,
+		SettingKeyCanvasURL,
 		SettingKeyDocURL,
 		SettingKeyHomeContent,
 		SettingKeyCompactHomeEnabled,
@@ -331,6 +333,8 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		APIBaseURL:                          settings[SettingKeyAPIBaseURL],
 		ContactInfo:                         settings[SettingKeyContactInfo],
 		RedeemPurchaseURL:                   redeemPurchaseURL(settings),
+		CanvasEnabled:                       canvasEnabled(settings),
+		CanvasURL:                           canvasURL(settings),
 		DocURL:                              settings[SettingKeyDocURL],
 		HomeContent:                         settings[SettingKeyHomeContent],
 		CompactHomeEnabled:                  settings[SettingKeyCompactHomeEnabled] == "true",
@@ -591,6 +595,8 @@ type PublicSettingsInjectionPayload struct {
 	APIBaseURL                          string                   `json:"api_base_url"`
 	ContactInfo                         string                   `json:"contact_info"`
 	RedeemPurchaseURL                   string                   `json:"redeem_purchase_url"`
+	CanvasEnabled                       bool                     `json:"canvas_enabled"`
+	CanvasURL                           string                   `json:"canvas_url"`
 	DocURL                              string                   `json:"doc_url"`
 	HomeContent                         string                   `json:"home_content"`
 	CompactHomeEnabled                  bool                     `json:"compact_home_enabled"`
@@ -686,6 +692,8 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		APIBaseURL:                          settings.APIBaseURL,
 		ContactInfo:                         settings.ContactInfo,
 		RedeemPurchaseURL:                   settings.RedeemPurchaseURL,
+		CanvasEnabled:                       settings.CanvasEnabled,
+		CanvasURL:                           settings.CanvasURL,
 		DocURL:                              settings.DocURL,
 		HomeContent:                         settings.HomeContent,
 		CompactHomeEnabled:                  settings.CompactHomeEnabled,

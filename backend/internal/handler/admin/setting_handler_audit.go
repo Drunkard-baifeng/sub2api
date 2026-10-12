@@ -332,6 +332,12 @@ func diffSettings(before *service.SystemSettings, after *service.SystemSettings,
 	if before.ContactInfo != after.ContactInfo {
 		changed = append(changed, "contact_info")
 	}
+	if before.CanvasEnabled != after.CanvasEnabled {
+		changed = append(changed, "canvas_enabled")
+	}
+	if before.CanvasURL != after.CanvasURL {
+		changed = append(changed, "canvas_url")
+	}
 	if before.RedeemPurchaseURL != after.RedeemPurchaseURL {
 		changed = append(changed, "redeem_purchase_url")
 	}

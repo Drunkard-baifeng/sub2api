@@ -6685,6 +6685,31 @@
                 </p>
               </div>
 
+              <!-- External Canvas -->
+              <div class="space-y-3 border-t border-gray-100 pt-4 dark:border-dark-700">
+                <div class="flex items-center justify-between gap-4">
+                  <div>
+                    <label for="canvas-enabled" class="font-medium text-gray-900 dark:text-white">{{ t("admin.settings.site.canvasEnabled") }}</label>
+                    <p id="canvas-enabled-hint" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t("admin.settings.site.canvasEnabledHint") }}</p>
+                  </div>
+                  <Toggle id="canvas-enabled" v-model="form.canvas_enabled" data-testid="canvas-enabled" :aria-label="t('admin.settings.site.canvasEnabled')" aria-describedby="canvas-enabled-hint" />
+                </div>
+                <div>
+                  <label for="canvas-url" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t("admin.settings.site.canvasUrl") }}</label>
+                  <input
+                    id="canvas-url"
+                    v-model="form.canvas_url"
+                    data-testid="canvas-url"
+                    type="url"
+                    class="input font-mono text-sm"
+                    :placeholder="DEFAULT_CANVAS_URL"
+                    :required="form.canvas_enabled"
+                    aria-describedby="canvas-url-hint"
+                  />
+                  <p id="canvas-url-hint" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ t("admin.settings.site.canvasUrlHint") }}</p>
+                </div>
+              </div>
+
               <!-- Doc URL -->
               <div>
                 <label
@@ -9071,6 +9096,7 @@ import TotpStepUpDialog from "@/components/auth/TotpStepUpDialog.vue";
 import { affiliatesAPI, type AffiliateAdminEntry, type SimpleUser as AffiliateSimpleUser } from "@/api/admin/affiliates";
 import { extractApiErrorMessage, extractI18nErrorMessage } from "@/utils/apiError";
 import { DEFAULT_REDEEM_PURCHASE_URL } from "@/config/redeem";
+import { DEFAULT_CANVAS_URL } from "@/config/canvas";
 import { useAppStore } from "@/stores";
 import { useAdminSettingsStore } from "@/stores/adminSettings";
 import { normalizeVisibleMethod } from "@/components/payment/paymentFlow";
@@ -9738,6 +9764,8 @@ type SettingsForm = Omit<
   | "openai_oauth_scheduling_rate_multiplier"
 > & {
   /** Form always binds a concrete boolean (SystemSettings marks this optional). */
+  canvas_enabled: boolean;
+  canvas_url: string;
   channel_monitor_hide_throughput: boolean;
   channel_monitor_show_quota: boolean;
   channel_monitor_hide_user_ranking: boolean;
@@ -9832,6 +9860,8 @@ const form = reactive<SettingsForm>({
   api_base_url: "",
   contact_info: "",
   redeem_purchase_url: DEFAULT_REDEEM_PURCHASE_URL,
+  canvas_enabled: true,
+  canvas_url: DEFAULT_CANVAS_URL,
   doc_url: "",
   home_content: "",
   compact_home_enabled: false,
@@ -11540,6 +11570,8 @@ async function saveSettings() {
       api_base_url: form.api_base_url,
       contact_info: form.contact_info,
       redeem_purchase_url: form.redeem_purchase_url?.trim() ?? "",
+      canvas_enabled: form.canvas_enabled,
+      canvas_url: form.canvas_url?.trim() ?? "",
       doc_url: form.doc_url,
       home_content: form.home_content,
       compact_home_enabled: form.compact_home_enabled,

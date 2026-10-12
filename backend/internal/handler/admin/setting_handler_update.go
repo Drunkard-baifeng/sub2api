@@ -159,6 +159,8 @@ type UpdateSettingsRequest struct {
 	APIBaseURL                  string                `json:"api_base_url"`
 	ContactInfo                 string                `json:"contact_info"`
 	RedeemPurchaseURL           *string               `json:"redeem_purchase_url"`
+	CanvasEnabled               *bool                 `json:"canvas_enabled"`
+	CanvasURL                   *string               `json:"canvas_url"`
 	DocURL                      string                `json:"doc_url"`
 	HomeContent                 string                `json:"home_content"`
 	CompactHomeEnabled          bool                  `json:"compact_home_enabled"`
@@ -1241,6 +1243,26 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		}
 	}
 
+	// Canvas is an external link, independent of payment and custom iframe pages.
+	canvasEnabled := previousSettings.CanvasEnabled
+	if req.CanvasEnabled != nil {
+		canvasEnabled = *req.CanvasEnabled
+	}
+	canvasURL := previousSettings.CanvasURL
+	if req.CanvasURL != nil {
+		canvasURL = strings.TrimSpace(*req.CanvasURL)
+	}
+	if canvasEnabled && canvasURL == "" {
+		response.BadRequest(c, "Canvas URL is required when enabled")
+		return
+	}
+	if canvasURL != "" {
+		if err := config.ValidateAbsoluteHTTPURL(canvasURL); err != nil {
+			response.BadRequest(c, "Canvas URL must be an absolute http(s) URL")
+			return
+		}
+	}
+
 	// “购买订阅”页面配置验证
 	purchaseEnabled := previousSettings.PurchaseSubscriptionEnabled
 	if req.PurchaseSubscriptionEnabled != nil {
@@ -1659,6 +1681,8 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		APIBaseURL:                             req.APIBaseURL,
 		ContactInfo:                            req.ContactInfo,
 		RedeemPurchaseURL:                      redeemPurchaseURL,
+		CanvasEnabled:                          canvasEnabled,
+		CanvasURL:                              canvasURL,
 		DocURL:                                 req.DocURL,
 		HomeContent:                            req.HomeContent,
 		CompactHomeEnabled:                     req.CompactHomeEnabled,
@@ -2324,6 +2348,8 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		APIBaseURL:                                             updatedSettings.APIBaseURL,
 		ContactInfo:                                            updatedSettings.ContactInfo,
 		RedeemPurchaseURL:                                      updatedSettings.RedeemPurchaseURL,
+		CanvasEnabled:                                          updatedSettings.CanvasEnabled,
+		CanvasURL:                                              updatedSettings.CanvasURL,
 		DocURL:                                                 updatedSettings.DocURL,
 		HomeContent:                                            updatedSettings.HomeContent,
 		CompactHomeEnabled:                                     updatedSettings.CompactHomeEnabled,

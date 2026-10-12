@@ -165,7 +165,10 @@ export default {
   // Navigation
   nav: {
     sectionApi: 'API',
+    canvas: '极速画布',
+    canvasNewTab: '极速画布（在新标签页打开）',
     sectionBilling: '账单',
+    sectionTools: '工具',
     sectionOther: '其他',
     dashboard: '仪表盘',
     announcements: '公告',

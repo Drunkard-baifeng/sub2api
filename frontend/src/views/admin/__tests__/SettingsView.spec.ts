@@ -741,6 +741,35 @@ describe("admin SettingsView payment visible method controls", () => {
     wrapper.unmount();
   });
 
+  it("loads and saves the canvas switch and URL, retaining the address when disabled", async () => {
+    getSettings.mockResolvedValue({ ...baseSettingsResponse, canvas_enabled: false, canvas_url: "https://example.com/canvas" });
+    const wrapper = mountView();
+    await flushPromises();
+    const toggle = wrapper.get<HTMLInputElement>('[data-testid="canvas-enabled"]');
+    const input = wrapper.get<HTMLInputElement>('[data-testid="canvas-url"]');
+    expect(toggle.element.checked).toBe(false);
+    expect(input.element.value).toBe("https://example.com/canvas");
+    await toggle.setValue(true);
+    await input.setValue(" https://example.com/new-canvas " );
+    await wrapper.find("form").trigger("submit.prevent");
+    await flushPromises();
+    expect(updateSettings).toHaveBeenLastCalledWith(expect.objectContaining({ canvas_enabled: true, canvas_url: "https://example.com/new-canvas" }));
+    expect(fetchPublicSettings).toHaveBeenCalledWith(true);
+    await toggle.setValue(false);
+    await wrapper.find("form").trigger("submit.prevent");
+    await flushPromises();
+    expect(updateSettings).toHaveBeenLastCalledWith(expect.objectContaining({ canvas_enabled: false, canvas_url: "https://example.com/new-canvas" }));
+    wrapper.unmount();
+  });
+
+  it("uses the default canvas settings on existing installations", async () => {
+    const wrapper = mountView();
+    await flushPromises();
+    expect(wrapper.get<HTMLInputElement>('[data-testid="canvas-enabled"]').element.checked).toBe(true);
+    expect(wrapper.get<HTMLInputElement>('[data-testid="canvas-url"]').element.value).toBe("https://image.jisuai.net");
+    wrapper.unmount();
+  });
+
   it("loads and saves the open button visibility for each custom menu", async () => {
     const menuItems = [
       { id: "docs", label: "Docs", url: "https://example.com/docs", icon_svg: "", visibility: "user", sort_order: 0 },

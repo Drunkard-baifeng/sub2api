@@ -155,6 +155,8 @@ type SystemSettings struct {
 	APIBaseURL                  string
 	ContactInfo                 string
 	RedeemPurchaseURL           string
+	CanvasEnabled               bool
+	CanvasURL                   string
 	DocURL                      string
 	HomeContent                 string
 	CompactHomeEnabled          bool
@@ -358,6 +360,8 @@ type PublicSettings struct {
 	APIBaseURL                          string
 	ContactInfo                         string
 	RedeemPurchaseURL                   string
+	CanvasEnabled                       bool
+	CanvasURL                           string
 	DocURL                              string
 	HomeContent                         string
 	CompactHomeEnabled                  bool

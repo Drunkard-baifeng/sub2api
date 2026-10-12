@@ -487,6 +487,8 @@ export interface SystemSettings {
   api_base_url: string;
   contact_info: string;
   redeem_purchase_url?: string;
+  canvas_enabled?: boolean;
+  canvas_url?: string;
   doc_url: string;
   home_content: string;
   compact_home_enabled: boolean;
@@ -840,6 +842,8 @@ export interface UpdateSettingsRequest {
   api_base_url?: string;
   contact_info?: string;
   redeem_purchase_url?: string;
+  canvas_enabled?: boolean;
+  canvas_url?: string;
   doc_url?: string;
   home_content?: string;
   compact_home_enabled?: boolean;

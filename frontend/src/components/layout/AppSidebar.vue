@@ -113,20 +113,25 @@
             <h3 class="sidebar-section-title" :class="{ 'sidebar-section-title-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">
               <span class="sidebar-section-title-text" :class="{ 'sidebar-section-title-text-collapsed': sidebarCollapsed }">{{ section.label }}</span>
             </h3>
-            <router-link
+            <component
               v-for="item in section.items"
               :key="item.path"
-              :to="item.path"
+              :is="item.external ? 'a' : RouterLink"
+              v-bind="item.external ? { href: item.path, target: '_blank', rel: 'noopener noreferrer' } : { to: item.path }"
               class="sidebar-link mb-1"
-              :class="{ 'sidebar-link-active': isActive(item.path), 'sidebar-link-collapsed': sidebarCollapsed }"
-              :title="sidebarCollapsed ? item.label : undefined"
+              :class="{ 'sidebar-link-active': !item.external && isActive(item.path), 'sidebar-link-collapsed': sidebarCollapsed }"
+              :title="item.external ? t('nav.canvasNewTab') : (sidebarCollapsed ? item.label : undefined)"
+              :aria-label="item.external ? t('nav.canvasNewTab') : undefined"
               :data-tour="item.path === '/keys' ? 'sidebar-my-keys' : undefined"
-              @click="handleMenuItemClick(item.path)"
+              @click="item.external ? closeMobile() : handleMenuItemClick(item.path)"
             >
               <span v-if="item.iconSvg" class="h-5 w-5 flex-shrink-0 sidebar-svg-icon" v-html="sanitizeSvg(item.iconSvg)"></span>
               <component v-else :is="item.icon" class="h-5 w-5 flex-shrink-0" />
-              <span class="sidebar-label" :class="{ 'sidebar-label-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">{{ item.label }}</span>
-            </router-link>
+              <span class="sidebar-label sidebar-label-flex" :class="{ 'sidebar-label-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">
+                {{ item.label }}
+                <Icon v-if="item.external" name="externalLink" size="sm" class="ml-auto shrink-0 opacity-50" aria-hidden="true" />
+              </span>
+            </component>
           </div>
         </div>
       </template>
@@ -137,20 +142,25 @@
           <h3 v-if="section.label" class="sidebar-section-title" :class="{ 'sidebar-section-title-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">
             <span class="sidebar-section-title-text" :class="{ 'sidebar-section-title-text-collapsed': sidebarCollapsed }">{{ section.label }}</span>
           </h3>
-          <router-link
+          <component
             v-for="item in section.items"
             :key="item.path"
-            :to="item.path"
+            :is="item.external ? 'a' : RouterLink"
+            v-bind="item.external ? { href: item.path, target: '_blank', rel: 'noopener noreferrer' } : { to: item.path }"
             class="sidebar-link mb-1"
-            :class="{ 'sidebar-link-active': isActive(item.path), 'sidebar-link-collapsed': sidebarCollapsed }"
-            :title="sidebarCollapsed ? item.label : undefined"
+            :class="{ 'sidebar-link-active': !item.external && isActive(item.path), 'sidebar-link-collapsed': sidebarCollapsed }"
+            :title="item.external ? t('nav.canvasNewTab') : (sidebarCollapsed ? item.label : undefined)"
+            :aria-label="item.external ? t('nav.canvasNewTab') : undefined"
             :data-tour="item.path === '/keys' ? 'sidebar-my-keys' : undefined"
-            @click="handleMenuItemClick(item.path)"
+            @click="item.external ? closeMobile() : handleMenuItemClick(item.path)"
           >
             <span v-if="item.iconSvg" class="h-5 w-5 flex-shrink-0 sidebar-svg-icon" v-html="sanitizeSvg(item.iconSvg)"></span>
             <component v-else :is="item.icon" class="h-5 w-5 flex-shrink-0" />
-            <span class="sidebar-label" :class="{ 'sidebar-label-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">{{ item.label }}</span>
-          </router-link>
+            <span class="sidebar-label sidebar-label-flex" :class="{ 'sidebar-label-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">
+              {{ item.label }}
+              <Icon v-if="item.external" name="externalLink" size="sm" class="ml-auto shrink-0 opacity-50" aria-hidden="true" />
+            </span>
+          </component>
         </div>
       </template>
     </nav>
@@ -197,24 +207,26 @@
 
 <script setup lang="ts">
 import { computed, h, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAdminSettingsStore, useAppStore, useAuthStore, useOnboardingStore } from '@/stores'
 import VersionBadge from '@/components/common/VersionBadge.vue'
 import Icon from '@/components/icons/Icon.vue'
 import { sanitizeSvg } from '@/utils/sanitize'
 import { sanitizeUrl } from '@/utils/url'
+import { resolveCanvasUrl } from '@/config/canvas'
 import { FeatureFlags, makeSidebarFlag } from '@/utils/featureFlags'
 import { resolveSiteBillingMode } from '@/utils/siteBillingMode'
 import { useBatchImageAccess } from '@/composables/useBatchImageAccess'
 
-type NavSectionId = 'overview' | 'api' | 'billing' | 'other'
+type NavSectionId = 'overview' | 'api' | 'billing' | 'tools' | 'other'
 
 interface NavItem {
   path: string
   label: string
   icon: unknown
   iconSvg?: string
+  external?: boolean
   section?: NavSectionId
   hideInSimpleMode?: boolean
   children?: NavItem[]
@@ -722,11 +734,19 @@ const flagPluginManagement = makeSidebarFlag(FeatureFlags.pluginManagement)
 const flagOpsMonitoring = () => adminSettingsStore.opsMonitoringEnabled
 const flagAdminPayment = () => adminSettingsStore.paymentEnabled
 const flagBatchImageAccess = () => canUseBatchImage.value
+const canvasUrl = computed(() => resolveCanvasUrl(appStore.cachedPublicSettings))
+const CanvasIcon = {
+  render: () => h('svg', { fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.5', 'aria-hidden': 'true' }, [
+    h('rect', { x: 3, y: 3, width: 18, height: 18, rx: 4 }),
+    h('circle', { cx: 8.5, cy: 8.5, r: 1.5 }),
+    h('path', { d: 'm4 17 5-5 4 4 3-3 4 4', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+  ]),
+}
 
 // buildSelfNavItems 构造用户自己的导航项（用户端主菜单和管理员的"我的账户"子菜单共享这组声明）。
 // withDashboard=true 时包含仪表盘（用户端），false 时不含（管理员的个人区已经有独立仪表盘入口）。
 //
-// 仪表盘独立展示，其余用户菜单按 API / 账单 / 其他分组。
+// 仪表盘独立展示，其余用户菜单按 API / 账单 / 工具 / 其他分组。
 // 可用渠道紧挨渠道状态之上，让用户"先看自己能用什么、再看对应状态"。
 function buildSelfNavItems(withDashboard: boolean): NavItem[] {
   const items: NavItem[] = []
@@ -744,6 +764,7 @@ function buildSelfNavItems(withDashboard: boolean): NavItem[] {
     { path: '/subscriptions', label: t('nav.mySubscriptions'), icon: CreditCardIcon, section: 'billing', hideInSimpleMode: true, featureFlag: flagSubscription },
     { path: '/redeem', label: t('nav.redeem'), icon: GiftIcon, section: 'billing', hideInSimpleMode: true },
     { path: '/affiliate', label: t('nav.affiliate'), icon: UsersIcon, section: 'billing', hideInSimpleMode: true, featureFlag: flagAffiliate },
+    ...(canvasUrl.value ? [{ path: canvasUrl.value, label: t('nav.canvas'), icon: CanvasIcon, section: 'tools' as const, external: true }] : []),
     { path: '/profile', label: t('nav.profile'), icon: UserIcon, section: 'other' },
     ...customMenuItemsForUser.value.map((item): NavItem => ({
       path: `/custom/${item.id}`,
@@ -768,6 +789,7 @@ function groupSelfNavItems(items: NavItem[]) {
     { id: 'overview', label: '' },
     { id: 'api', label: t('nav.sectionApi') },
     { id: 'billing', label: t('nav.sectionBilling') },
+    { id: 'tools', label: t('nav.sectionTools') },
     { id: 'other', label: t('nav.sectionOther') },
   ]
   return sections

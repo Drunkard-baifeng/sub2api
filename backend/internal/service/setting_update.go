@@ -342,6 +342,8 @@ func (s *SettingService) buildSystemSettingsUpdates(ctx context.Context, setting
 	updates[SettingKeyAPIBaseURL] = settings.APIBaseURL
 	updates[SettingKeyContactInfo] = settings.ContactInfo
 	updates[SettingKeyRedeemPurchaseURL] = strings.TrimSpace(settings.RedeemPurchaseURL)
+	updates[SettingKeyCanvasEnabled] = strconv.FormatBool(settings.CanvasEnabled)
+	updates[SettingKeyCanvasURL] = strings.TrimSpace(settings.CanvasURL)
 	updates[SettingKeyDocURL] = settings.DocURL
 	updates[SettingKeyHomeContent] = settings.HomeContent
 	updates[SettingKeyCompactHomeEnabled] = strconv.FormatBool(settings.CompactHomeEnabled)
