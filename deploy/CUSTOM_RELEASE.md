@@ -2,7 +2,8 @@
 
 日常合并与升级请先看 [定制版更新操作手册](CUSTOM_UPDATE.md)：覆盖上游合并、冲突处理、验证、GitHub Actions 编译发布、1Panel 更新及回滚。本页保留发布配置和首次安装说明；下面的版本号均为历史示例，每次发布应使用新的实际版本。
 
-本仓库维护分支为 `custom`，发布仓库为 `Drunkard-baifeng/sub2api`。
+本仓库维护分支为 `main`，发布仓库为 `Drunkard-baifeng/sub2api`。
+旧 `custom` 分支保留历史；版本中的 `-custom.N` 继续使用，与维护分支名无关。
 保留完整发布流程：先构建前端并嵌入 Go 程序，再生成多平台安装包和 Docker 镜像。
 
 ## 发布内容
@@ -21,13 +22,13 @@
 
 ## 首次准备
 
-1. 将发布配置提交并推送到 `origin/custom`。
+1. 将发布配置提交并推送到 `origin/main`。
 2. 在 GitHub 仓库的 **Actions** 页面启用工作流；Fork 仓库若出现启用提示，先确认启用。
 3. 在 **Settings → Secrets and variables → Actions → Variables** 中，
    确保 `SIMPLE_RELEASE` 没有设置为 `true`（删除或设为 `false`）。
    完整发布不勾选手动运行中的 `simple_release`。
 4. 工作流已声明 `contents: write` 和 `packages: write`，使用 GitHub 自动提供的 `GITHUB_TOKEN`。
-   GHCR 不需要另建同名 Secret；仓库/组织策略需允许这些权限，`custom` 分支保护规则需允许版本文件回写。
+   GHCR 不需要另建同名 Secret；仓库/组织策略需允许这些权限，`main` 分支保护规则需允许版本文件回写。
 5. 默认只向 GHCR 发布 Docker 镜像。需要同时推送 Docker Hub 时，再添加 Actions Secrets：
    `DOCKERHUB_USERNAME`、`DOCKERHUB_TOKEN`。不使用 Docker Hub 时两项都不配置。
 6. 首次发布 GHCR 包后，检查包 **Package settings → Change visibility**，
@@ -37,8 +38,8 @@
 
 在 **Actions → Release → Run workflow**：
 
-- **Use workflow from**：选择 `custom`。
-- **tag**：填写 `custom`。
+- **Use workflow from**：选择 `main`。
+- **tag**：填写 `main`。
 - **simple_release**：不勾选。
 - **dry_run**：勾选。
 
@@ -49,7 +50,7 @@
 Docker OCI 文件仅用于 runner 内验证，不作为这些下载产物上传。
 
 如果没有 **Run workflow** 按钮，检查仓库是否已启用 Actions，以及默认分支是否存在
-带 `workflow_dispatch` 的 `release.yml`。选择 `custom` 后再运行，不要误选上游的 `main`。
+带 `workflow_dispatch` 的 `release.yml`。在自己的 Fork `Drunkard-baifeng/sub2api` 中选择 `main`，不要在原作者仓库中操作。
 
 ## 正式发布
 
@@ -68,8 +69,8 @@ Docker OCI 文件仅用于 runner 内验证，不作为这些下载产物上传�
 确认试跑通过、代码已提交推送后，在项目根目录执行以下 PowerShell 命令：
 
 ```powershell
-git switch custom
-git pull --ff-only origin custom
+git switch main
+git pull --ff-only origin main
 git status --short
 # 确认工作区没有待提交改动，然后执行：
 git tag -a v0.2.13-custom.1 -m "release: v0.2.13-custom.1" -m "定制版首次发布：品牌界面、充值与兑换优化，多平台程序及 Docker 镜像。"
@@ -84,8 +85,8 @@ git push origin v0.2.13-custom.1
 `sub2api_0.2.13-custom.1_linux_amd64.tar.gz`；ARM64 服务器选择 `linux_arm64` 包。
 用 `uname -m` 判断：`x86_64` 对应 amd64，`aarch64` 对应 arm64。
 
-全部发布步骤成功后，工作流会将版本号写回 **custom** 分支的
-`backend/cmd/server/VERSION`。本地继续开发前执行 `git pull --ff-only origin custom`。
+全部发布步骤成功后，工作流会将版本号写回 **main** 分支的
+`backend/cmd/server/VERSION`。本地继续开发前执行 `git pull --ff-only origin main`。
 
 ## Linux 首次安装（不用 Docker）
 

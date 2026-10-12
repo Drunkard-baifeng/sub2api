@@ -21,6 +21,16 @@ spec.loader.exec_module(release)
 
 
 class ReleaseMatrixTest(unittest.TestCase):
+    def test_version_sync_targets_fork_main(self):
+        workflow = yaml.safe_load((ROOT / '.github/workflows/release.yml').read_text(encoding='utf-8'))
+        job = workflow['jobs']['sync-version-file']
+        checkout = next(step for step in job['steps'] if step.get('uses', '').startswith('actions/checkout@'))
+        self.assertEqual(checkout['with']['ref'], 'main')
+        commands = '\n'.join(step.get('run', '') for step in job['steps'])
+        self.assertIn('git push origin HEAD:main', commands)
+        self.assertNotIn('HEAD:custom', commands)
+        self.assertIn("needs.prepare.outputs.dry_run != 'true'", job['if'])
+
     def setUp(self):
         self.previous = Path.cwd()
         self.temp = tempfile.TemporaryDirectory()

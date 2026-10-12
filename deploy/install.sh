@@ -2,7 +2,7 @@
 #
 # Sub2API Installation Script
 # Sub2API 安装脚本
-# Usage: curl -fsSL https://raw.githubusercontent.com/Drunkard-baifeng/sub2api/custom/deploy/install.sh -o install.sh && sudo bash install.sh
+# Usage: curl -fsSL https://raw.githubusercontent.com/Drunkard-baifeng/sub2api/main/deploy/install.sh -o install.sh && sudo bash install.sh
 #
 
 set -e

@@ -18,6 +18,43 @@
 
 </div>
 
+## 关于本定制版 Fork
+
+本仓库是 [Drunkard-baifeng/sub2api](https://github.com/Drunkard-baifeng/sub2api)，基于 [Wei-Shaw/sub2api](https://github.com/Wei-Shaw/sub2api) Fork 并持续合并上游更新。原项目与贡献者的署名、许可证和相关声明均保留；本 Fork 主要维护定制界面、功能入口和独立发布渠道。
+
+**日常修改、合并上游和准备发布，直接在本 Fork 的 `main` 分支完成。** 原来的 `custom` 分支仅保留历史，不再需要 `custom → main` 这一步。
+
+| 项目 | 本仓库约定 |
+| --- | --- |
+| 开发与维护分支 | `main`，推送到 `origin/main` |
+| 上游更新来源 | 将 `upstream/main` 合并到本 Fork 的 `main` |
+| Docker 镜像 | `ghcr.io/drunkard-baifeng/sub2api:<版本号>` |
+| 发布标签 | `v<上游基础版本>-custom.<序号>` |
+
+`origin/main` 属于自己的 Fork，`upstream/main` 属于原项目：同名分支位于不同仓库，互不等同。版本号中的 `-custom.N` 用于区分定制发布，与分支名无关，已有标签和镜像继续保留。
+
+### 定制内容
+
+- **品牌界面**：首页、登录、注册使用青绿色毛玻璃风格，保留浅色与深色模式。
+- **账户与支付**：钱包、充值、兑换及支付方式布局优化，购买 CDK 的链接支持后台配置。
+- **工具入口**：「工具 → 极速画布」在新标签页打开，显示开关和目标地址支持站点设置。
+- **独立发布**：前端嵌入 Go 程序，同时构建多平台安装包及 Linux amd64/arm64 Docker 镜像。
+
+### 开始开发与部署
+
+```bash
+git clone --branch main https://github.com/Drunkard-baifeng/sub2api.git
+cd sub2api
+git remote add upstream https://github.com/Wei-Shaw/sub2api.git
+```
+
+已有本地仓库继续使用即可，无须重新克隆。
+
+- [日常更新操作手册](deploy/CUSTOM_UPDATE.md)：合并上游 → 验证 → 推送 `main` → 打新标签 → GitHub 构建 → 1Panel 更新。
+- [发布配置与首次安装](deploy/CUSTOM_RELEASE.md)：完整发布流程、镜像地址和 Linux 安装说明。
+
+**部署本定制版请以上述两份手册为准。** 下方保留原项目文档作为功能与配置参考，其中赞助商、声明、统计徽章归属上游；指向上游仓库的安装命令不是本定制版的发布渠道。
+
 
 ## ⚠️ 重要提醒
 
@@ -246,6 +283,8 @@ fast_mode = true
 ---
 
 ## 部署方式
+
+> 本节保留上游部署参考。安装本定制版请使用 [CUSTOM_RELEASE.md](deploy/CUSTOM_RELEASE.md) 和 [CUSTOM_UPDATE.md](deploy/CUSTOM_UPDATE.md)，Docker 镜像使用 `ghcr.io/drunkard-baifeng/sub2api`，避免安装成原版。
 
 ### 方式一：脚本安装（推荐）
 

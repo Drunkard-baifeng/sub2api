@@ -18,6 +18,14 @@
 
 </div>
 
+## カスタマイズ版 Fork について
+
+このリポジトリは [Wei-Shaw/sub2api](https://github.com/Wei-Shaw/sub2api) を基にした [Drunkard-baifeng/sub2api](https://github.com/Drunkard-baifeng/sub2api) です。開発・上流のマージ・リリース準備は、この Fork の **`main`** で行います。旧 `custom` ブランチは履歴用です。
+
+リリースの `-custom.N` はバージョン識別子で、ブランチ名とは独立しています。Docker イメージは `ghcr.io/drunkard-baifeng/sub2api:<version>` を使用します。
+
+カスタマイズ内容は [中文 README](README_CN.md) または [English README](README.md)、更新手順は [更新ガイド](deploy/CUSTOM_UPDATE.md)、インストールは [リリースガイド](deploy/CUSTOM_RELEASE.md) を参照してください。以下は上流の参考文書です。上流向けのインストールコマンドではなく、この Fork のガイドを使用してください。原作者のクレジットとライセンスは保持しています。
+
 ## ⚠️ 重要なお知らせ
 
 本プロジェクトをご利用になる前に、以下の内容を必ずよくお読みください：
@@ -221,6 +229,8 @@ Nginx はデフォルトでアンダースコアを含むヘッダー（例: `se
 ---
 
 ## デプロイ
+
+> 以下は上流向けの参考手順です。この Fork の導入は [CUSTOM_RELEASE.md](deploy/CUSTOM_RELEASE.md) と [CUSTOM_UPDATE.md](deploy/CUSTOM_UPDATE.md) を参照してください。
 
 ### 方法1: スクリプトによるインストール（推奨）
 

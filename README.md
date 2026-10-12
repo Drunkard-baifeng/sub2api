@@ -18,6 +18,42 @@ English | [中文](README_CN.md) | [日本語](README_JA.md)
 
 </div>
 
+## About this customized Fork
+
+This repository is [Drunkard-baifeng/sub2api](https://github.com/Drunkard-baifeng/sub2api), a customized Fork of [Wei-Shaw/sub2api](https://github.com/Wei-Shaw/sub2api). The upstream authors retain credit for the original project; this Fork maintains its own interface and deployment channel.
+
+**Development, upstream merges, and release preparation now happen directly on this Fork's `main`.** The former `custom` branch is retained for history, not as an extra development step.
+
+| Item | This Fork |
+| --- | --- |
+| Working branch | `main` → `origin/main` |
+| Upstream updates | Merge `upstream/main` into this Fork's `main` |
+| Container image | `ghcr.io/drunkard-baifeng/sub2api:<version>` |
+| Release tags | `v<base-version>-custom.<revision>` |
+
+The `-custom.N` version suffix identifies a customized release; it is independent of the branch name. Existing release tags and image names stay unchanged.
+
+### Customizations
+
+- Branded home, login, and registration pages with a teal glass-style interface and light/dark modes.
+- Updated wallet, recharge, redemption, and payment-method layouts; configurable CDK purchase link.
+- **Tools → 极速画布** opens in a new tab; its visibility and destination are configurable under site settings.
+- Full release pipeline: embedded frontend, multi-platform binaries, and Linux amd64/arm64 Docker images.
+
+### Development and deployment
+
+```bash
+git clone --branch main https://github.com/Drunkard-baifeng/sub2api.git
+cd sub2api
+git remote add upstream https://github.com/Wei-Shaw/sub2api.git
+```
+
+- [中文定制版说明](README_CN.md)
+- [Update guide: merge → push → release → 1Panel](deploy/CUSTOM_UPDATE.md) (Chinese)
+- [Release configuration and installation](deploy/CUSTOM_RELEASE.md) (Chinese)
+
+Use these customized guides and this Fork's image namespace for deployment. The original project documentation below is retained as upstream reference, including its notices, sponsors, and attribution; its upstream installation commands are not this Fork's deployment channel.
+
 ## ⚠️ Important Notice
 
 Please read the following carefully before using this project:
@@ -220,6 +256,8 @@ Nginx drops headers containing underscores by default (e.g. `session_id`), which
 ---
 
 ## Deployment
+
+> The commands in this inherited section describe upstream deployment. To install this customized Fork, follow [CUSTOM_RELEASE.md](deploy/CUSTOM_RELEASE.md) and [CUSTOM_UPDATE.md](deploy/CUSTOM_UPDATE.md) and use the `ghcr.io/drunkard-baifeng/sub2api` image.
 
 ### Method 1: Script Installation (Recommended)
 

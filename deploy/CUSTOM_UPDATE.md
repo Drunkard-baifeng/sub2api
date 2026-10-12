@@ -1,6 +1,6 @@
 # 定制版更新操作手册：合并 → 推送 → 编译发布 → 1Panel 更新
 
-适用于本仓库的 `custom` 分支，以及已通过 1Panel Docker 编排安装的应用。PostgreSQL、Redis 沿用现有部署。
+适用于本仓库的 `main` 分支，以及已通过 1Panel Docker 编排安装的应用。PostgreSQL、Redis 沿用现有部署。
 
 流程：**检查工作区 → 同步自己的远端 → 合并上游 → 处理冲突 → 验证 → 提交并推送分支 → 检查 CI → 推送新标签 → 等待 Release 成功 → 备份并更新服务器 → 验证业务。**
 
@@ -11,7 +11,7 @@
 | 项目 | 固定值或规则 |
 | --- | --- |
 | 本地项目 | `E:\Project\Go\server\sub2api` |
-| 定制分支 | `custom` |
+| 定制分支 | `main` |
 | origin（自己的仓库） | `https://github.com/Drunkard-baifeng/sub2api.git` |
 | upstream（上游） | `https://github.com/Wei-Shaw/sub2api.git` |
 | 合并来源 | `upstream/main` |
@@ -19,7 +19,9 @@
 | VERSION 文件和镜像标签 | 去掉 Git 标签开头的 `v` |
 | Docker 镜像 | `ghcr.io/drunkard-baifeng/sub2api:<镜像标签>` |
 
-`v0.2.14-custom.1` 是本次已使用的版本，后续不要重复创建。同一基础版本的下次发布可以使用 `v0.2.14-custom.2`；合并新基础版本后，例如使用 `v0.2.15-custom.1`。先查上游实际版本和已有标签，再确定编号。
+本文版本号均为历史示例，不表示下次可用版本。`v0.2.13-custom.1`、`v0.2.14-custom.1`、`v0.2.15-custom.1` 等已使用的标签不要重复创建。同一基础版本递增 `custom.N`，合并新基础版本后再从该基础版本的序号开始；发布前先检查已有标签。
+
+自 2026-10-12 起，直接在自己的 Fork `main` 维护，旧 `custom` 分支仅保留历史。`origin/main` 是自己的仓库，`upstream/main` 是原项目。`-custom.N` 是定制版本标识，与维护分支名无关。
 
 ## 2. 同步和备份本地分支
 
@@ -35,8 +37,8 @@ git status --short --branch
 工作区干净后：
 
 ```powershell
-git switch custom
-git pull --ff-only origin custom
+git switch main
+git pull --ff-only origin main
 git fetch upstream --prune
 git fetch origin --tags
 git remote -v
@@ -46,12 +48,12 @@ git show upstream/main:backend/cmd/server/VERSION
 git tag --list 'v*-custom.*' --sort=-version:refname
 ```
 
-`pull --ff-only` 如果提示分叉，先检查双方提交，不要直接强推。Release 可能回写版本号，所以合并上游前要先同步 `origin/custom`。
+`pull --ff-only` 如果提示分叉，先检查双方提交，不要直接强推。Release 可能回写版本号，所以合并上游前要先同步 `origin/main`。
 
 保存合并前的本地指针：
 
 ```powershell
-$backupBranch = 'codex/backup-custom-' + (Get-Date -Format 'yyyyMMdd-HHmmss')
+$backupBranch = 'codex/backup-main-' + (Get-Date -Format 'yyyyMMdd-HHmmss')
 git branch $backupBranch
 ```
 
@@ -69,12 +71,13 @@ git diff --name-only --diff-filter=U
 
 - 首页、登录注册、青绿色主题、品牌 Logo、右上角钱包。
 - 充值、兑换、支付方式布局和后台购买 CDK 链接配置。
-- `.github/workflows/release.yml`、`.goreleaser.yaml`、更新服务及 `deploy/install.sh` 中自己的仓库来源。
+- 工具分组的极速画布入口，以及后台显示开关和目标地址。
+- `.github/workflows/release.yml` 的版本回写必须指向 `main`；`.goreleaser.yaml`、更新服务及 `deploy/install.sh` 保持自己的仓库来源。
 - `backend/cmd/server/VERSION` 和 `frontend/pnpm-lock.yaml`。
 
 ### 版本号冲突
 
-选择本次准备发布的**新版本**。以下 `0.2.14-custom.2` 仅作下次同基础版本发布的示例：
+选择本次准备发布的**新版本**。以下 `0.2.14-custom.2` 仅作版本格式示例，使用前须确认该标签未被发布：
 
 ```powershell
 $releaseVersion = '0.2.14-custom.2' # 按本次上游版本、已有发布记录修改
@@ -154,8 +157,8 @@ Go 版本以 `backend/go.mod` 为准。数据库、Redis、Docker 相关集成�
 git status --short
 git diff --cached --stat
 git diff --cached --check
-git commit -m 'Merge upstream/main v0.2.14 into custom' # 修改为本次实际基础版本
-git push origin custom
+git commit -m 'Merge upstream/main v0.2.14 into main' # 修改为本次实际基础版本
+git push origin main
 git status --short --branch
 ```
 
@@ -170,8 +173,8 @@ GitHub 编译由 Actions 完成，Git 本身只负责版本管理。采用完整
 本地 PowerShell，项目根目录：
 
 ```powershell
-git switch custom
-git pull --ff-only origin custom
+git switch main
+git pull --ff-only origin main
 git status --short
 $releaseVersion = (Get-Content backend/cmd/server/VERSION -Raw).Trim()
 $releaseTag = 'v' + $releaseVersion
@@ -188,7 +191,7 @@ git push origin $releaseTag
 
 在 [Actions](https://github.com/Drunkard-baifeng/sub2api/actions) 找到对应标签的 **Release**，等待成功。完整发布包含五平台二进制、校验文件及 Linux amd64/arm64 镜像。
 
-如果需要先试编译，在 **Release → Run workflow** 选择 `custom`，tag/ref 填 `custom`，勾选 `dry_run`、不勾选 `simple_release`；试跑成功不代表正式发布完成。
+如果需要先试编译，在 **Release → Run workflow** 选择 `main`，tag/ref 填 `main`，勾选 `dry_run`、不勾选 `simple_release`；试跑成功不代表正式发布完成。
 
 正式发布后检查：
 
@@ -250,8 +253,8 @@ curl -fsS https://api.jisuai.net/health
 发布完成后，本地同步工作流可能回写的版本号：
 
 ```powershell
-git switch custom
-git pull --ff-only origin custom
+git switch main
+git pull --ff-only origin main
 git status --short --branch
 ```
 
