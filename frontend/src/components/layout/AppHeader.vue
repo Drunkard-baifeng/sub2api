@@ -25,6 +25,7 @@
       <div class="flex min-w-0 items-center gap-1 sm:gap-3">
         <!-- Announcement Bell -->
         <AnnouncementBell v-if="user" />
+        <TicketUnread v-if="user" />
 
         <!-- Docs Link -->
         <a
@@ -230,6 +231,7 @@ import { useAppStore, useAuthStore, useOnboardingStore } from '@/stores'
 import { useAdminSettingsStore } from '@/stores/adminSettings'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import SubscriptionProgressMini from '@/components/common/SubscriptionProgressMini.vue'
+import TicketUnread from '@/components/common/TicketUnread.vue'
 import AnnouncementBell from '@/components/common/AnnouncementBell.vue'
 import HeaderWallet from '@/components/layout/HeaderWallet.vue'
 import Icon from '@/components/icons/Icon.vue'

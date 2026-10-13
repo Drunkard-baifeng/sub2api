@@ -29,6 +29,7 @@
 
 ## 部署与更新
 
+- [工单中心使用与部署说明](deploy/SUPPORT_TICKETS.md)
 - [发布配置与安装说明](deploy/CUSTOM_RELEASE.md)
 - [日常更新：合并上游 → 验证 → 推送 → 发布 → 1Panel 更新](deploy/CUSTOM_UPDATE.md)
 - [本仓库发布包](https://github.com/Drunkard-baifeng/sub2api/releases)

@@ -1,12 +1,15 @@
 package main
 
 import (
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/Wei-Shaw/sub2api/internal/config"
 	"github.com/Wei-Shaw/sub2api/internal/handler"
 	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/Wei-Shaw/sub2api/internal/support"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,7 +54,13 @@ func TestProvideCleanup_WithMinimalDependencies_NoPanic(t *testing.T) {
 	schedulerSnapshotSvc := service.NewSchedulerSnapshotService(nil, nil, nil, nil, cfg)
 	opsSystemLogSinkSvc := service.NewOpsSystemLogSink(nil)
 
+	supportDB, supportMock, err := sqlmock.New()
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = supportDB.Close() })
+	supportMock.ExpectExec("WITH expired AS").WillReturnResult(sqlmock.NewResult(0, 0))
+
 	cleanup := provideCleanup(
+		support.NewHandler(supportDB, nil),
 		nil, // entClient
 		nil, // redis
 		&service.OpsMetricsCollector{},
@@ -103,6 +112,9 @@ func TestProvideCleanup_WithMinimalDependencies_NoPanic(t *testing.T) {
 		nil, // pluginManager
 	)
 
+	cleanup = sync.OnceFunc(cleanup)
+	t.Cleanup(cleanup)
+	require.Eventually(t, func() bool { return supportMock.ExpectationsWereMet() == nil }, time.Second, time.Millisecond)
 	require.NotPanics(t, func() {
 		cleanup()
 	})

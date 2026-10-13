@@ -31,6 +31,8 @@ func RegisterAdminRoutes(
 	admin.Use(gin.HandlerFunc(auditLog))
 	admin.Use(middleware.AdminComplianceGuard(settingService))
 	{
+		h.Support.Register(admin.Group("/tickets"), true)
+
 		// 部署与运营合规确认
 		registerAdminComplianceRoutes(admin, h)
 

@@ -765,6 +765,7 @@ function buildSelfNavItems(withDashboard: boolean): NavItem[] {
     { path: '/redeem', label: t('nav.redeem'), icon: GiftIcon, section: 'billing', hideInSimpleMode: true },
     { path: '/affiliate', label: t('nav.affiliate'), icon: UsersIcon, section: 'billing', hideInSimpleMode: true, featureFlag: flagAffiliate },
     ...(canvasUrl.value ? [{ path: canvasUrl.value, label: t('nav.canvas'), icon: CanvasIcon, section: 'tools' as const, external: true }] : []),
+    { path: '/tickets', label: t('tickets.title'), icon: TicketIcon, section: 'other' },
     { path: '/profile', label: t('nav.profile'), icon: UserIcon, section: 'other' },
     ...customMenuItemsForUser.value.map((item): NavItem => ({
       path: `/custom/${item.id}`,
@@ -844,6 +845,7 @@ const adminNavItems = computed((): NavItem[] => {
     { path: '/admin/subscriptions', label: t('nav.subscriptions'), icon: CreditCardIcon, hideInSimpleMode: true, featureFlag: flagSubscription },
     { path: '/admin/accounts', label: t('nav.accounts'), icon: GlobeIcon },
     { path: '/admin/plugins', label: t('nav.plugins'), icon: PluginIcon, featureFlag: flagPluginManagement },
+    { path: '/admin/tickets', label: t('tickets.adminTitle'), icon: TicketIcon },
     { path: '/admin/announcements', label: t('nav.announcements'), icon: BellIcon },
     { path: '/admin/proxies', label: t('nav.proxies'), icon: ServerIcon },
     {

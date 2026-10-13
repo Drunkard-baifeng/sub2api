@@ -18,6 +18,18 @@ import { resolveRouteDocumentTitle } from './title'
  * Route definitions with lazy loading
  */
 const routes: RouteRecordRaw[] = [
+  {
+    path: '/tickets',
+    name: 'Tickets',
+    component: () => import('@/views/user/TicketsView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: false, title: 'Support center', titleKey: 'tickets.title' }
+  },
+  {
+    path: '/admin/tickets',
+    name: 'AdminTickets',
+    component: () => import('@/views/user/TicketsView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true, title: 'Support tickets', titleKey: 'tickets.adminTitle' }
+  },
   // ==================== Setup Routes ====================
   {
     path: '/setup',
