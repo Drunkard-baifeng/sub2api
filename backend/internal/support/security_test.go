@@ -109,10 +109,10 @@ func TestDeleteRoutesRequireAdmin(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 	mr := miniredis.RunT(t)
 	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
-	defer rdb.Close()
+	defer func() { _ = rdb.Close() }()
 	h := NewHandler(db, rdb)
 	router := gin.New()
 	router.Use(func(c *gin.Context) {
@@ -149,7 +149,7 @@ func TestImageBudgetAtomicAndFailClosed(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mr := miniredis.RunT(t)
 	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
-	defer rdb.Close()
+	defer func() { _ = rdb.Close() }()
 	h := NewHandler(nil, rdb)
 	call := func(id int64, images []Image) (bool, *httptest.ResponseRecorder) {
 		w := httptest.NewRecorder()
@@ -159,7 +159,7 @@ func TestImageBudgetAtomicAndFailClosed(t *testing.T) {
 		return h.chargeImages(c, images), w
 	}
 	key := "support:image-bytes:1"
-	mr.Set(key, strconv.Itoa(maxImageDailyBytes-32))
+	require.NoError(t, mr.Set(key, strconv.Itoa(maxImageDailyBytes-32)))
 	mr.SetTTL(key, time.Hour)
 	var wg sync.WaitGroup
 	var successes atomic.Int32
